@@ -1,19 +1,20 @@
 package com.example.clouds;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.viewbinding.ViewBinding;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModelProvider;
 
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import com.example.clouds.base.BaseActivity;
 import com.example.clouds.databinding.ActivityMainBinding;
 import com.tencent.mmkv.MMKV;
 
 public class MainActivity extends BaseActivity<ActivityMainBinding> {
+
     private final String TAG = getClass().getName();
+    private MainModel mModel;
+    private MMKV mmkv;
 
     @Override
     protected ActivityMainBinding getViewBinding() {
@@ -23,32 +24,30 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
     @Override
     protected void initView() {
         mBinding.text.setText("你是谁");
-        MMKV.initialize(this);
-        MMKV mmkv = MMKV.defaultMMKV();
-        mmkv.encode("name", 123);
-        mmkv.apply();
-        mBinding.mmkv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int name = mmkv.decodeInt("name");
-                Log.d(TAG, "onClick: " + name);
-            }
-        });
     }
 
     @Override
     protected void initListener() {
+        mBinding.mmkv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mModel.setNum("记录");
+            }
+        });
 
     }
 
     @Override
     protected void initViewModel() {
-
+        mModel = new ViewModelProvider.NewInstanceFactory().create(MainModel.class);
+        mModel.initMMKV(this);
     }
 
     @Override
     protected void initData() {
-
+        mModel.num.observe(this, values -> {
+            mBinding.text.setText(values);
+        });
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.example.clouds.ui;
+package com.example.clouds.ui.blank;
 
 import androidx.lifecycle.ViewModel;
 
