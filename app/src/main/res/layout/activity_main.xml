@@ -7,19 +7,78 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/text"
+        android:id="@+id/title_settings"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/mmkv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="点击"
+        android:layout_marginTop="@dimen/margin_top_15dp"
+        android:text="@string/title_settings"
+        android:textColor="@color/white"
+        android:textSize="@dimen/title_size"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/button_keyingtone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_start_300dp"
+        android:background="@drawable/keyingtone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/button_language"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/magin_start_100dp"
+        android:background="@drawable/language"
+        app:layout_constraintStart_toEndOf="@+id/button_keyingtone"
+        app:layout_constraintTop_toTopOf="@id/button_keyingtone"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/button_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/magin_start_100dp"
+        android:background="@drawable/time"
+        app:layout_constraintStart_toEndOf="@+id/button_language"
+        app:layout_constraintTop_toTopOf="@id/button_language"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/button_version"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/magin_start_100dp"
+        android:background="@drawable/version"
+        app:layout_constraintStart_toEndOf="@+id/button_time"
+        app:layout_constraintTop_toTopOf="@id/button_time"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/button_network"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/magin_start_100dp"
+        android:background="@drawable/network"
+        app:layout_constraintStart_toEndOf="@+id/button_version"
+        app:layout_constraintTop_toTopOf="@id/button_version"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/button_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_start_150dp"
+        android:layout_marginBottom="@dimen/margin_bottom_100dp"
+        android:background="@drawable/back"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="MissingConstraints" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

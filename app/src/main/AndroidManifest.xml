@@ -9,6 +9,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Clouds">
+        <activity android:name=".ui.version.VersionActivity"></activity>
+        <activity android:name=".ui.time.TimeActivity" />
+        <activity android:name=".ui.network.NetworkActivity" />
+        <activity android:name=".ui.language.LanguageActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -16,6 +20,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ui.keyingtone.KeyingToneActivity" />
     </application>
 
 </manifest>
