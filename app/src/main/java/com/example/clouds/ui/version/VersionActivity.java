@@ -27,7 +27,6 @@ public class VersionActivity extends BaseActivity<ActivityVersionBinding> implem
     @Override
     protected void initListener() {
         mBinding.buttonBack.setOnClickListener(this);
-
     }
 
     @Override

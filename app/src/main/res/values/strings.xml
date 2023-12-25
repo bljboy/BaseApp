@@ -17,4 +17,6 @@
     <string name="language">简体中文</string>
     <string name="string_am">am</string>
     <string name="string_pm">pm</string>
+    <string name="network_switch_title">网络</string>
+    <string name="network_connect_title">已连接</string>
 </resources>
