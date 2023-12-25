@@ -3,12 +3,15 @@ package com.example.clouds.ui.version;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewbinding.ViewBinding;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.view.View;
 
+import com.example.clouds.R;
 import com.example.clouds.base.BaseActivity;
 import com.example.clouds.databinding.ActivityVersionBinding;
 
-public class VersionActivity extends BaseActivity<ActivityVersionBinding> {
+public class VersionActivity extends BaseActivity<ActivityVersionBinding> implements View.OnClickListener {
 
 
     @Override
@@ -23,6 +26,7 @@ public class VersionActivity extends BaseActivity<ActivityVersionBinding> {
 
     @Override
     protected void initListener() {
+        mBinding.buttonBack.setOnClickListener(this);
 
     }
 
@@ -39,5 +43,13 @@ public class VersionActivity extends BaseActivity<ActivityVersionBinding> {
     @Override
     protected void loadData() {
 
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.button_back) {
+            finish();
+        }
     }
 }

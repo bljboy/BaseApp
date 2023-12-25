@@ -10,7 +10,7 @@
         android:id="@+id/title_language"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_top_15dp"
+        android:layout_marginTop="@dimen/margin_15dp"
         android:text="@string/title_language"
         android:textColor="@color/white"
         android:textSize="@dimen/title_size"
@@ -20,14 +20,38 @@
         tools:ignore="MissingConstraints" />
 
     <TextView
+        android:layout_width="@dimen/width_600dp"
+        android:layout_height="@dimen/height_120dp"
+        android:background="@drawable/rounded_line"
+        android:gravity="center"
+        android:text="@string/language"
+        android:textColor="@color/white"
+        android:textSize="50sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
         android:id="@+id/button_back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/margin_start_150dp"
-        android:layout_marginBottom="@dimen/margin_bottom_100dp"
+        android:layout_marginStart="@dimen/margin_150dp"
+        android:layout_marginBottom="@dimen/margin_100dp"
         android:background="@drawable/back"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         tools:ignore="MissingConstraints" />
 
+    <TextView
+        android:id="@+id/button_ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_150dp"
+        android:layout_marginBottom="@dimen/margin_100dp"
+        android:background="@drawable/ok"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="MissingConstraints" />
 </androidx.constraintlayout.widget.ConstraintLayout>

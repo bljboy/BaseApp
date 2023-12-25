@@ -10,7 +10,7 @@
         android:id="@+id/title_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_top_15dp"
+        android:layout_marginTop="@dimen/margin_15dp"
         android:text="@string/title_time"
         android:textColor="@color/white"
         android:textSize="@dimen/title_size"
@@ -20,13 +20,104 @@
         tools:ignore="MissingConstraints" />
 
     <TextView
+        android:id="@+id/time_up"
+        android:layout_width="130dp"
+        android:layout_height="130dp"
+        android:layout_marginTop="100dp"
+        android:background="@drawable/time_up"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/time_down"
+        android:layout_width="130dp"
+        android:layout_height="130dp"
+        android:layout_marginBottom="100dp"
+        android:background="@drawable/time_down"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="MissingConstraints" />
+
+    <RadioGroup
+        android:id="@+id/time_rg"
+        android:layout_width="wrap_content"
+        android:layout_height="80dp"
+        android:layout_marginStart="150dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingConstraints">
+
+        <RadioButton
+            android:id="@+id/time_day"
+            style="@style/TimeTheme"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="MissingConstraints" />
+
+
+        <RadioButton
+            android:id="@+id/time_month"
+            style="@style/TimeTheme"
+            android:background="@drawable/rounded_line"
+            tools:ignore="MissingConstraints" />
+
+        <RadioButton
+            android:id="@+id/time_year"
+            style="@style/TimeTheme"
+            android:background="@drawable/rounded_line"
+            tools:ignore="MissingConstraints" />
+
+        <RadioButton
+            android:id="@+id/time_hour"
+            style="@style/TimeTheme"
+            android:layout_marginStart="50dp"
+            tools:ignore="MissingConstraints" />
+
+        <RadioButton
+            android:id="@+id/time_minutes"
+            style="@style/TimeTheme"
+            tools:ignore="MissingConstraints" />
+    </RadioGroup>
+
+    <RadioButton
+        android:id="@+id/time_am_pm"
+        style="@style/TimeTheme"
+        app:layout_constraintStart_toEndOf="@+id/time_rg"
+        app:layout_constraintTop_toTopOf="@+id/time_rg"
+        tools:ignore="MissingConstraints" />
+
+    <RadioButton
+        android:id="@+id/time_12_24"
+        style="@style/TimeTheme"
+        app:layout_constraintStart_toEndOf="@+id/time_am_pm"
+        app:layout_constraintTop_toTopOf="@+id/time_am_pm"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
         android:id="@+id/button_back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/margin_start_150dp"
-        android:layout_marginBottom="@dimen/margin_bottom_100dp"
+        android:layout_marginStart="@dimen/margin_150dp"
+        android:layout_marginBottom="@dimen/margin_80dp"
         android:background="@drawable/back"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/button_ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_150dp"
+        android:layout_marginBottom="@dimen/margin_80dp"
+        android:background="@drawable/ok"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         tools:ignore="MissingConstraints" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="margin_start_300dp">500dp</dimen>
-    <dimen name="magin_start_100dp">100dp</dimen>
+    <dimen name="margin_300dp">500dp</dimen>
+    <dimen name="margin_100dp">100dp</dimen>
     <dimen name="title_size">40sp</dimen>
-    <dimen name="margin_top_15dp">15dp</dimen>
-    <dimen name="margin_start_150dp">150dp</dimen>
-    <dimen name="margin_bottom_100dp">100dp</dimen>
+    <dimen name="margin_15dp">15dp</dimen>
+    <dimen name="margin_150dp">150dp</dimen>
+    <dimen name="margin_80dp">80dp</dimen>
+    <dimen name="width_180dp">180dp</dimen>
+    <dimen name="width_600dp">600dp</dimen>
+    <dimen name="height_120dp">120dp</dimen>
 </resources>

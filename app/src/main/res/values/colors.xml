@@ -7,4 +7,7 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!--    按键音背景颜色-->
+    <color name="keyingtone_bg">#313131</color>
 </resources>

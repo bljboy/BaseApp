@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 在res/drawable目录下创建一个XML文件，例如：rounded_rectangle.xml -->
+    <solid android:color="@color/keyingtone_bg" /> <!-- 你可以选择你需要的颜色 -->
+    <corners android:radius="150dp" /> <!-- 这里的radius决定了圆角的大小 -->
+</shape>
+

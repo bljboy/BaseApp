@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?><!-- res/drawable/yellow_rounded_border.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@android:color/transparent" /> <!-- 内部填充颜色透明 -->
+    <stroke
+        android:width="2dp"
+        android:color="#FFEB3B" /> <!-- 边框颜色和宽度 -->
+    <corners android:radius="150dp" /> <!-- 圆角的半径 -->
+</shape>
