@@ -9,4 +9,17 @@
     <dimen name="width_180dp">180dp</dimen>
     <dimen name="width_600dp">600dp</dimen>
     <dimen name="height_120dp">120dp</dimen>
+    <dimen name="margin_40dp">40dp</dimen>
+    <dimen name="width_700dp">700dp</dimen>
+    <dimen name="margin_10dp">10dp</dimen>
+    <dimen name="text_size_25sp">25sp</dimen>
+    <dimen name="margin_20dp">20dp</dimen>
+    <dimen name="height_80dp">80dp</dimen>
+    <dimen name="width_130dp">130dp</dimen>
+    <dimen name="height_130dp">130dp</dimen>
+    <dimen name="text_size_50sp">50sp</dimen>
+    <dimen name="margin_50dp">50dp</dimen>
+    <dimen name="recycler_network_150dp">150dp</dimen>
+    <dimen name="recycler_network_50dp">50dp</dimen>
+    <dimen name="recycler_network_25dp">25dp</dimen>
 </resources>

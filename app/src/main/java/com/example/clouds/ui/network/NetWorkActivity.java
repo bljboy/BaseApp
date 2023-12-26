@@ -12,14 +12,17 @@ import android.view.View;
 
 import com.example.clouds.R;
 import com.example.clouds.adapter.network.NetWorkAdapter;
+import com.example.clouds.adapter.network.NetWorkSearchAdapter;
 import com.example.clouds.base.BaseActivity;
 import com.example.clouds.databinding.ActivityNetworkBinding;
 import com.example.clouds.ui.keyingtone.KeyingToneViewModel;
 
-public class NetworkActivity extends BaseActivity<ActivityNetworkBinding> implements View.OnClickListener {
+public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implements View.OnClickListener {
 
+    private NetWorkSearchAdapter mNetworkSearchAdapter;
     private NetWorkAdapter mNetworkAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    private RecyclerView.LayoutManager mSearchLayoutManager;
     private NetWorkViewModel mViewModel;
     private boolean isNetworkSwitch = true;
 
@@ -30,6 +33,15 @@ public class NetworkActivity extends BaseActivity<ActivityNetworkBinding> implem
 
     @Override
     protected void initView() {
+        mSearchLayoutManager = new LinearLayoutManager(this) {
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
+        mBinding.recyclerNetworkSearch.setLayoutManager(mSearchLayoutManager);
+        mNetworkSearchAdapter = new NetWorkSearchAdapter();
+        mBinding.recyclerNetworkSearch.setAdapter(mNetworkSearchAdapter);
         //让recyclerview不能滑动
         mLayoutManager = new LinearLayoutManager(this) {
             @Override
@@ -40,6 +52,7 @@ public class NetworkActivity extends BaseActivity<ActivityNetworkBinding> implem
         mBinding.recyclerNetworkConnect.setLayoutManager(mLayoutManager);
         mNetworkAdapter = new NetWorkAdapter();
         mBinding.recyclerNetworkConnect.setAdapter(mNetworkAdapter);
+
     }
 
     @Override
@@ -62,6 +75,9 @@ public class NetworkActivity extends BaseActivity<ActivityNetworkBinding> implem
                 isNetworkSwitch = aBoolean;
                 mBinding.networkButtonSwitch.setChecked(aBoolean);
                 mBinding.recyclerNetworkConnect.setVisibility(aBoolean ? View.VISIBLE : View.GONE);
+                mBinding.recyclerNetworkSearch.setVisibility(aBoolean ? View.VISIBLE : View.GONE);
+                mBinding.networkOtherTitle.setVisibility(aBoolean ? View.VISIBLE : View.GONE);
+                mBinding.networkButtonRefresh.setVisibility(aBoolean ? View.VISIBLE : View.GONE);
             }
         });
 
@@ -79,8 +95,14 @@ public class NetworkActivity extends BaseActivity<ActivityNetworkBinding> implem
         } else if (v.getId() == R.id.network_button_switch) {
             if (isNetworkSwitch) {
                 mBinding.recyclerNetworkConnect.setVisibility(View.VISIBLE);
+                mBinding.recyclerNetworkSearch.setVisibility(View.VISIBLE);
+                mBinding.networkOtherTitle.setVisibility(View.VISIBLE);
+                mBinding.networkButtonRefresh.setVisibility(View.VISIBLE);
             } else {
                 mBinding.recyclerNetworkConnect.setVisibility(View.GONE);
+                mBinding.recyclerNetworkSearch.setVisibility(View.GONE);
+                mBinding.networkOtherTitle.setVisibility(View.GONE);
+                mBinding.networkButtonRefresh.setVisibility(View.GONE);
             }
             mViewModel.netWorkSwitch.setValue(!isNetworkSwitch);
         }

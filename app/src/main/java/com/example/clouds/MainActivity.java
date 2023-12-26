@@ -10,7 +10,7 @@ import com.example.clouds.base.BaseActivity;
 import com.example.clouds.databinding.ActivityMainBinding;
 import com.example.clouds.ui.keyingtone.KeyingToneActivity;
 import com.example.clouds.ui.language.LanguageActivity;
-import com.example.clouds.ui.network.NetworkActivity;
+import com.example.clouds.ui.network.NetWorkActivity;
 import com.example.clouds.ui.time.TimeActivity;
 import com.example.clouds.ui.version.VersionActivity;
 import com.tencent.mmkv.MMKV;
@@ -80,7 +80,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> implements V
                 startActivity(new Intent(MainActivity.this, VersionActivity.class));
                 break;
             case R.id.button_network:
-                startActivity(new Intent(MainActivity.this, NetworkActivity.class));
+                startActivity(new Intent(MainActivity.this, NetWorkActivity.class));
                 break;
         }
     }

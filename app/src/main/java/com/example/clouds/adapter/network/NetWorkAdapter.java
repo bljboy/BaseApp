@@ -14,20 +14,20 @@ import com.example.clouds.R;
 
 import org.jetbrains.annotations.NotNull;
 
-public class NetWorkAdapter extends RecyclerView.Adapter<NetWorkAdapter.NetWorkViewHolder> {
+public class NetWorkAdapter extends RecyclerView.Adapter<NetWorkAdapter.MyViewHolder> {
 
     private int expandedPosition = -1; // -1表示没有选中的item
 
     @NonNull
     @NotNull
     @Override
-    public NetWorkAdapter.NetWorkViewHolder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
+    public NetWorkAdapter.MyViewHolder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recyclerview_network_connect, parent, false);
-        return new NetWorkViewHolder(v);
+        return new MyViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull @NotNull NetWorkAdapter.NetWorkViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull @NotNull NetWorkAdapter.MyViewHolder holder, int position) {
         final boolean isExpanded = position == expandedPosition;
         holder.recycler_network_details.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
         holder.recycler_network_list.setOnClickListener(new View.OnClickListener() {
@@ -46,11 +46,11 @@ public class NetWorkAdapter extends RecyclerView.Adapter<NetWorkAdapter.NetWorkV
 
 
     // 提供对视图的引用
-    public static class NetWorkViewHolder extends RecyclerView.ViewHolder {
+    public static class MyViewHolder extends RecyclerView.ViewHolder {
         public ConstraintLayout recycler_network_details;
         public ConstraintLayout recycler_network_list;
 
-        public NetWorkViewHolder(View v) {
+        public MyViewHolder(View v) {
             super(v);
             recycler_network_list = v.findViewById(R.id.recycler_network_list);
             recycler_network_details = v.findViewById(R.id.recycler_network_details);

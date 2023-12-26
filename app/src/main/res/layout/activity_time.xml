@@ -21,9 +21,9 @@
 
     <TextView
         android:id="@+id/time_up"
-        android:layout_width="130dp"
-        android:layout_height="130dp"
-        android:layout_marginTop="100dp"
+        android:layout_width="@dimen/width_130dp"
+        android:layout_height="@dimen/height_130dp"
+        android:layout_marginTop="@dimen/margin_100dp"
         android:background="@drawable/time_up"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -32,9 +32,9 @@
 
     <TextView
         android:id="@+id/time_down"
-        android:layout_width="130dp"
-        android:layout_height="130dp"
-        android:layout_marginBottom="100dp"
+        android:layout_width="@dimen/width_130dp"
+        android:layout_height="@dimen/height_130dp"
+        android:layout_marginBottom="@dimen/margin_100dp"
         android:background="@drawable/time_down"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -44,8 +44,8 @@
     <RadioGroup
         android:id="@+id/time_rg"
         android:layout_width="wrap_content"
-        android:layout_height="80dp"
-        android:layout_marginStart="150dp"
+        android:layout_height="@dimen/height_80dp"
+        android:layout_marginStart="@dimen/margin_150dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
