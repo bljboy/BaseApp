@@ -22,6 +22,7 @@ import com.example.clouds.entry.WifiEntry;
 import java.util.List;
 
 import static com.example.clouds.constants.NetWorkConstants.REQUEST_CODE;
+import static com.example.clouds.constants.NetWorkConstants.REQUEST_CODE1;
 import static com.example.clouds.constants.NetWorkConstants.REQUEST_CODE_BACKGROUND_LOCATION;
 import static com.example.clouds.constants.NetWorkConstants.REQUEST_CODE_FINE_LOCATION;
 
@@ -34,8 +35,13 @@ public class NetWorkViewModel extends ViewModel {
     public MutableLiveData<Boolean> netWorkSwitch = new MutableLiveData<>();
     public MutableLiveData<List<WifiConfiguration>> wifiConfigList = new MutableLiveData<>();
     public MutableLiveData<String> isWifiConnected = new MutableLiveData<>();
+    public MutableLiveData<Boolean> isWifiConnectSuccess = new MutableLiveData<>();
+    public MutableLiveData<Boolean> isWifiDisConnected = new MutableLiveData<>();
+    public MutableLiveData<Boolean> isWifiRemove = new MutableLiveData<>();
+    private Context mContext;
 
     public void initConnect(Context context) {
+        this.mContext = context;
         if (mWifiManager == null) {
             mWifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         }
@@ -51,6 +57,22 @@ public class NetWorkViewModel extends ViewModel {
         //获取wifi开关初始状态
         boolean wifiEnabled = mWifiManager.isWifiEnabled();
         netWorkSwitch.setValue(wifiEnabled);
+    }
+
+    /**
+     * 移除已保存wifi
+     */
+
+    public void removeConnectWifi(int value) {
+        if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.CHANGE_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.CHANGE_WIFI_STATE}, REQUEST_CODE1);
+            boolean removeNetwork = mWifiManager.removeNetwork(value);
+            mWifiManager.saveConfiguration();
+            isWifiRemove.setValue(removeNetwork);
+            Log.d(TAG, "移除已保存wifi: removeConnectWifi = [" + value + "]");
+            Log.d(TAG, "移除已保存wifi: removeConnectWifi removeNetwork= [" + removeNetwork + "]");
+        }
+
     }
 
     /**

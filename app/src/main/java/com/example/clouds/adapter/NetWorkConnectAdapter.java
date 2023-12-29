@@ -76,17 +76,22 @@ public class NetWorkConnectAdapter extends RecyclerView.Adapter<NetWorkConnectAd
             holder.recycler_network_connect.setText(R.string.network_connect_details);
         }
 
+        //移除已保存wifi
+        holder.recycler_network_ignore.setOnClickListener(v -> {
+            mViewModel.removeConnectWifi(list.get(position).networkId);
+            Log.d(TAG, "onBindViewHolder: " + "removeConnectWifi:" + list.get(position).networkId);
+        });
+
         //连接设备或断开设备按钮
         holder.recycler_network_connect.setOnClickListener(v -> {
             if (!isConnected) {
                 mViewModel.setConnectWifi(list.get(position).networkId);
                 mViewModel.isWifiConnected.postValue(list.get(position).SSID);
-                Log.d(TAG, "onBindViewHolder: " + "networkId1:" + list.get(position).networkId);
+                Log.d(TAG, "onBindViewHolder: " + "setConnectWifi1:" + list.get(position).networkId);
             } else {
                 mViewModel.setDisConnectWifi(list.get(position).networkId);
                 mViewModel.isWifiConnected.postValue(list.get(position).SSID);
-                Log.d(TAG, "onBindViewHolder: " + "networkId2:" + list.get(position).networkId);
-
+                Log.d(TAG, "onBindViewHolder: " + "setConnectWifi2:" + list.get(position).networkId);
             }
         });
 
@@ -115,6 +120,7 @@ public class NetWorkConnectAdapter extends RecyclerView.Adapter<NetWorkConnectAd
         public TextView recycler_network_name;
         public TextView recycler_network_title;
         public TextView recycler_network_connect;
+        public TextView recycler_network_ignore;
 
         public MyViewHolder(View v) {
             super(v);
@@ -123,6 +129,7 @@ public class NetWorkConnectAdapter extends RecyclerView.Adapter<NetWorkConnectAd
             recycler_network_name = v.findViewById(R.id.recycler_network_name);
             recycler_network_title = v.findViewById(R.id.recycler_network_title);
             recycler_network_connect = v.findViewById(R.id.recycler_network_connect);
+            recycler_network_ignore = v.findViewById(R.id.recycler_network_ignore);
 
         }
     }

@@ -5,4 +5,5 @@ public class NetWorkConstants {
     public static final int REQUEST_CODE = 0X0001;
     public static final int REQUEST_CODE_FINE_LOCATION = 0X0002;
     public static final int REQUEST_CODE_BACKGROUND_LOCATION = 0X0003;
+    public static final int REQUEST_CODE1 = 0X0004;
 }

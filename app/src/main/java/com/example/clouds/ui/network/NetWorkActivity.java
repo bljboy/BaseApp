@@ -39,7 +39,10 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
     @Override
     protected void initView() {
         //WiFi开关按钮广播WiFi状态
-        IntentFilter intentFilter = new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        intentFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+        intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         registerReceiver(netWorkReceiver, intentFilter);
 
         //扫描WiFi列表适配器
@@ -81,6 +84,24 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
 
     @Override
     protected void initData() {
+        mViewModel.isWifiRemove.observe(this, values -> {
+            if (values) {
+                Log.d(TAG, "断开连接。。。: initData...isWifiDisConnected = [" + values + "]");
+                mNetworkConnectAdapter.notifyDataSetChanged();
+            }
+        });
+        mViewModel.isWifiDisConnected.observe(this, values -> {
+            if (values) {
+                Log.d(TAG, "断开连接。。。: initData...isWifiDisConnected = [" + values + "]");
+//                mNetworkConnectAdapter.notifyDataSetChanged();
+            }
+        });
+        mViewModel.isWifiConnectSuccess.observe(this, values -> {
+            if (values) {
+                Log.d(TAG, "正在连接中。。。: initData...isWifiConnecting = [" + values + "]");
+                mNetworkConnectAdapter.notifyDataSetChanged();
+            }
+        });
         mViewModel.isWifiConnected.observe(this, values -> {
             if (values != null) {
                 mNetworkConnectAdapter.getisWifiConnected(values);
@@ -127,6 +148,19 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
     @Override
     public void onWifiStateChange(boolean enabled) {
         mViewModel.netWorkSwitch.setValue(enabled);
+        Log.d(TAG, "onWifiStateChange = [" + enabled + "]");
+    }
+
+    @Override
+    public void onWifiConnectSuccess(boolean enabled) {
+        mViewModel.isWifiConnectSuccess.setValue(enabled);
+        Log.d(TAG, "正在连接中。。。: onWifiConnecting = [" + enabled + "]");
+    }
+
+    @Override
+    public void onWifiDisConnected(boolean enabled) {
+        mViewModel.isWifiDisConnected.setValue(enabled);
+        Log.d(TAG, "断开连接。。。: onWifiDisConnected = [" + enabled + "]");
     }
 
     //根据wifi开关显示列表
