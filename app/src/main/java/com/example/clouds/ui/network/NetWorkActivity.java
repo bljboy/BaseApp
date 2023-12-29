@@ -1,30 +1,35 @@
 package com.example.clouds.ui.network;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewbinding.ViewBinding;
 
-import android.os.Bundle;
+import android.content.IntentFilter;
+import android.net.wifi.WifiManager;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 
 import com.example.clouds.R;
-import com.example.clouds.adapter.network.NetWorkAdapter;
-import com.example.clouds.adapter.network.NetWorkSearchAdapter;
+import com.example.clouds.adapter.NetWorkConnectAdapter;
+import com.example.clouds.adapter.NetWorkSearchAdapter;
 import com.example.clouds.base.BaseActivity;
+import com.example.clouds.receiver.NetWorkReceiver;
 import com.example.clouds.databinding.ActivityNetworkBinding;
-import com.example.clouds.ui.keyingtone.KeyingToneViewModel;
+import com.example.clouds.listener.WifiStateChangeListener;
 
-public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implements View.OnClickListener {
+public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implements View.OnClickListener, WifiStateChangeListener {
 
+    private static final String TAG = "NetWorkActivity";
+    private NetWorkReceiver netWorkReceiver;
     private NetWorkSearchAdapter mNetworkSearchAdapter;
-    private NetWorkAdapter mNetworkAdapter;
+    private NetWorkConnectAdapter mNetworkConnectAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private RecyclerView.LayoutManager mSearchLayoutManager;
     private NetWorkViewModel mViewModel;
     private boolean isNetworkSwitch = true;
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
     protected ActivityNetworkBinding getViewBinding() {
@@ -33,6 +38,11 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
 
     @Override
     protected void initView() {
+        //WiFi开关按钮广播WiFi状态
+        IntentFilter intentFilter = new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        registerReceiver(netWorkReceiver, intentFilter);
+
+        //扫描WiFi列表适配器
         mSearchLayoutManager = new LinearLayoutManager(this) {
             @Override
             public boolean canScrollVertically() {
@@ -49,43 +59,58 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
                 return false;
             }
         };
+        //已保存wifi列表适配器
         mBinding.recyclerNetworkConnect.setLayoutManager(mLayoutManager);
-        mNetworkAdapter = new NetWorkAdapter();
-        mBinding.recyclerNetworkConnect.setAdapter(mNetworkAdapter);
-
+        mNetworkConnectAdapter = new NetWorkConnectAdapter(mViewModel, this);
+        mBinding.recyclerNetworkConnect.setAdapter(mNetworkConnectAdapter);
     }
 
     @Override
     protected void initListener() {
         mBinding.buttonBack.setOnClickListener(this);
         mBinding.networkButtonSwitch.setOnClickListener(this);
-
     }
 
     @Override
     protected void initViewModel() {
         mViewModel = new ViewModelProvider(this, new ViewModelProvider.NewInstanceFactory()).get(NetWorkViewModel.class);
+        mViewModel.checkPermissions(this);
+        mViewModel.initConnect(this);
+        netWorkReceiver = new NetWorkReceiver(this);
     }
 
     @Override
     protected void initData() {
-        mViewModel.netWorkSwitch.observe(this, new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean aBoolean) {
-                isNetworkSwitch = aBoolean;
-                mBinding.networkButtonSwitch.setChecked(aBoolean);
-                mBinding.recyclerNetworkConnect.setVisibility(aBoolean ? View.VISIBLE : View.GONE);
-                mBinding.recyclerNetworkSearch.setVisibility(aBoolean ? View.VISIBLE : View.GONE);
-                mBinding.networkOtherTitle.setVisibility(aBoolean ? View.VISIBLE : View.GONE);
-                mBinding.networkButtonRefresh.setVisibility(aBoolean ? View.VISIBLE : View.GONE);
+        mViewModel.isWifiConnected.observe(this, values -> {
+            if (values != null) {
+                mNetworkConnectAdapter.getisWifiConnected(values);
+                Log.d(TAG, "当前连接WiFi: isWifiConnected = [" + values + "]");
             }
         });
-
+        mViewModel.netWorkSwitch.observe(this, enable -> {
+            isNetworkSwitch = enable;
+            mBinding.networkButtonSwitch.setChecked(enable);
+            showNetworkView(enable);
+        });
+        mViewModel.wifiConfigList.observe(this, enable -> {
+            Log.d(TAG, "initData: " + enable);
+            if (enable != null) {
+                mNetworkConnectAdapter.setListWifi(enable);
+            }
+        });
     }
 
     @Override
     protected void loadData() {
         mViewModel.getStatus();
+        mViewModel.getConnectionInfo(this);
+        mViewModel.getConnected(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(netWorkReceiver);
     }
 
     @Override
@@ -93,18 +118,23 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
         if (v.getId() == R.id.button_back) {
             finish();
         } else if (v.getId() == R.id.network_button_switch) {
-            if (isNetworkSwitch) {
-                mBinding.recyclerNetworkConnect.setVisibility(View.VISIBLE);
-                mBinding.recyclerNetworkSearch.setVisibility(View.VISIBLE);
-                mBinding.networkOtherTitle.setVisibility(View.VISIBLE);
-                mBinding.networkButtonRefresh.setVisibility(View.VISIBLE);
-            } else {
-                mBinding.recyclerNetworkConnect.setVisibility(View.GONE);
-                mBinding.recyclerNetworkSearch.setVisibility(View.GONE);
-                mBinding.networkOtherTitle.setVisibility(View.GONE);
-                mBinding.networkButtonRefresh.setVisibility(View.GONE);
-            }
-            mViewModel.netWorkSwitch.setValue(!isNetworkSwitch);
+            //wifi开关按钮
+            showNetworkView(isNetworkSwitch);
+            mViewModel.setWifiEnabled(!isNetworkSwitch);
         }
     }
+
+    @Override
+    public void onWifiStateChange(boolean enabled) {
+        mViewModel.netWorkSwitch.setValue(enabled);
+    }
+
+    //根据wifi开关显示列表
+    private void showNetworkView(boolean enabled) {
+        mBinding.recyclerNetworkConnect.setVisibility(enabled ? View.VISIBLE : View.GONE);
+        mBinding.recyclerNetworkSearch.setVisibility(enabled ? View.VISIBLE : View.GONE);
+        mBinding.networkOtherTitle.setVisibility(enabled ? View.VISIBLE : View.GONE);
+        mBinding.networkButtonRefresh.setVisibility(enabled ? View.VISIBLE : View.GONE);
+    }
+
 }

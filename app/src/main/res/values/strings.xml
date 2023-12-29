@@ -19,4 +19,8 @@
     <string name="string_pm">pm</string>
     <string name="network_switch_title">网络</string>
     <string name="network_connect_title">已连接</string>
+    <string name="network_disconnect_title">未连接</string>
+    <string name="network_disconnect_details">断开此设备</string>
+    <string name="network_connect_details">连接此设备</string>
+
 </resources>

@@ -1,4 +1,4 @@
-package com.example.clouds.adapter.network;
+package com.example.clouds.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
