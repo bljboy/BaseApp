@@ -48,6 +48,7 @@ public class NetWorkReceiver extends BroadcastReceiver {
                     listener.onWifiConnectSuccess(true);
                 } else if (state == NetworkInfo.DetailedState.DISCONNECTED) {
                     listener.onWifiDisConnected(true);
+                    listener.onWifiRemove(true);
                 }
             }
         }

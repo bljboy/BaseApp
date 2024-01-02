@@ -86,16 +86,15 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
     protected void initData() {
         mViewModel.isWifiRemove.observe(this, values -> {
             if (values) {
-                Log.d(TAG, "断开连接。。。: initData...isWifiDisConnected = [" + values + "]");
-                mNetworkConnectAdapter.notifyDataSetChanged();
+                Log.d(TAG, "移除配置。。。: initData...isWifiRemove = [" + values + "]");
             }
         });
         mViewModel.isWifiDisConnected.observe(this, values -> {
             if (values) {
                 Log.d(TAG, "断开连接。。。: initData...isWifiDisConnected = [" + values + "]");
-//                mNetworkConnectAdapter.notifyDataSetChanged();
             }
         });
+
         mViewModel.isWifiConnectSuccess.observe(this, values -> {
             if (values) {
                 Log.d(TAG, "正在连接中。。。: initData...isWifiConnecting = [" + values + "]");
@@ -113,10 +112,10 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
             mBinding.networkButtonSwitch.setChecked(enable);
             showNetworkView(enable);
         });
-        mViewModel.wifiConfigList.observe(this, enable -> {
-            Log.d(TAG, "initData: " + enable);
-            if (enable != null) {
-                mNetworkConnectAdapter.setListWifi(enable);
+        mViewModel.wifiConfigList.observe(this, list -> {
+            Log.d(TAG, "initData: " + list);
+            if (list != null) {
+                mNetworkConnectAdapter.setListWifi(list);
             }
         });
     }
@@ -124,7 +123,7 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
     @Override
     protected void loadData() {
         mViewModel.getStatus();
-        mViewModel.getConnectionInfo(this);
+        mViewModel.getConnectionInfo();
         mViewModel.getConnected(this);
     }
 
@@ -148,7 +147,8 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
     @Override
     public void onWifiStateChange(boolean enabled) {
         mViewModel.netWorkSwitch.setValue(enabled);
-        Log.d(TAG, "onWifiStateChange = [" + enabled + "]");
+        Log.d(TAG, "开关状态。。。: onWifiStateChange = [" + enabled + "]");
+
     }
 
     @Override
@@ -161,6 +161,11 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
     public void onWifiDisConnected(boolean enabled) {
         mViewModel.isWifiDisConnected.setValue(enabled);
         Log.d(TAG, "断开连接。。。: onWifiDisConnected = [" + enabled + "]");
+    }
+
+    @Override
+    public void onWifiRemove(boolean enabled) {
+//        mViewModel.isWifiRemove.setValue(enabled);
     }
 
     //根据wifi开关显示列表

@@ -41,7 +41,7 @@ public class NetWorkConnectAdapter extends RecyclerView.Adapter<NetWorkConnectAd
     public void setListWifi(List<WifiConfiguration> wifiEntityList) {
         Log.d(TAG, "setListWifi: " + wifiEntityList);
         this.list = wifiEntityList;
-
+        notifyDataSetChanged();
         //自测代码，无需提交
 //        for (WifiConfiguration configuration : wifiEntityList) {
 //            ssid = configuration.SSID;
@@ -78,8 +78,8 @@ public class NetWorkConnectAdapter extends RecyclerView.Adapter<NetWorkConnectAd
 
         //移除已保存wifi
         holder.recycler_network_ignore.setOnClickListener(v -> {
-            mViewModel.removeConnectWifi(list.get(position).networkId);
             Log.d(TAG, "onBindViewHolder: " + "removeConnectWifi:" + list.get(position).networkId);
+            mViewModel.removeConnectWifi(list.get(position).networkId,mContext);
         });
 
         //连接设备或断开设备按钮

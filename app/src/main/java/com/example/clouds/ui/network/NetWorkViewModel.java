@@ -1,11 +1,13 @@
 package com.example.clouds.ui.network;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -38,10 +40,8 @@ public class NetWorkViewModel extends ViewModel {
     public MutableLiveData<Boolean> isWifiConnectSuccess = new MutableLiveData<>();
     public MutableLiveData<Boolean> isWifiDisConnected = new MutableLiveData<>();
     public MutableLiveData<Boolean> isWifiRemove = new MutableLiveData<>();
-    private Context mContext;
 
     public void initConnect(Context context) {
-        this.mContext = context;
         if (mWifiManager == null) {
             mWifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         }
@@ -63,16 +63,21 @@ public class NetWorkViewModel extends ViewModel {
      * 移除已保存wifi
      */
 
-    public void removeConnectWifi(int value) {
-        if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.CHANGE_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.CHANGE_WIFI_STATE}, REQUEST_CODE1);
-            boolean removeNetwork = mWifiManager.removeNetwork(value);
-            mWifiManager.saveConfiguration();
-            isWifiRemove.setValue(removeNetwork);
-            Log.d(TAG, "移除已保存wifi: removeConnectWifi = [" + value + "]");
-            Log.d(TAG, "移除已保存wifi: removeConnectWifi removeNetwork= [" + removeNetwork + "]");
+    public void removeConnectWifi(int networkId, Context context) {
+        boolean removeNetwork = mWifiManager.removeNetwork(networkId);
+        boolean saveConfiguration = mWifiManager.saveConfiguration();
+        isWifiRemove.setValue(removeNetwork);
+        Log.d(TAG, "移除已保存wifi: removeConnectWifi = [" + removeNetwork + "]");
+        if (removeNetwork && saveConfiguration) {
+            refreshWifiList();
         }
 
+    }
+
+    private void refreshWifiList() {
+        // 更新Wi-Fi列表显示
+        @SuppressLint("MissingPermission") List<WifiConfiguration> wifiConfigurationList = mWifiManager.getConfiguredNetworks();
+        wifiConfigList.setValue(wifiConfigurationList);
     }
 
     /**
@@ -135,17 +140,11 @@ public class NetWorkViewModel extends ViewModel {
     /**
      * 获取已连接过的wifi数组
      *
-     * @param context
+     * @param
      */
-    public void getConnectionInfo(Context context) {
+    public void getConnectionInfo() {
         // 检查权限
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(context, Manifest.permission.CHANGE_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
-            // 如果没有权限，向用户请求权限
-            ActivityCompat.requestPermissions((Activity) context,
-                    new String[]{Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.CHANGE_WIFI_STATE},
-                    REQUEST_CODE);
-        }
-        List<WifiConfiguration> wifiConfigurationList = mWifiManager.getConfiguredNetworks();
+        @SuppressLint("MissingPermission") List<WifiConfiguration> wifiConfigurationList = mWifiManager.getConfiguredNetworks();
         wifiConfigList.setValue(wifiConfigurationList);
         Log.d(TAG, "获取已连接过的wifi数组: wifiConfigurationList = [" + wifiConfigurationList + "]");
     }
@@ -159,10 +158,14 @@ public class NetWorkViewModel extends ViewModel {
         //动态请求位置权限：
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE_FINE_LOCATION);
-        }
-        //对于 API 级别 29 或更高的设备，请求后台位置权限：
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            //对于 API 级别 29 或更高的设备，请求后台位置权限：
             ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION}, REQUEST_CODE_BACKGROUND_LOCATION);
+        } else if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(context, Manifest.permission.CHANGE_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
+            // 如果没有权限，向用户请求权限
+            ActivityCompat.requestPermissions((Activity) context,
+                    new String[]{Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.CHANGE_WIFI_STATE},
+                    REQUEST_CODE);
         }
     }
 }
