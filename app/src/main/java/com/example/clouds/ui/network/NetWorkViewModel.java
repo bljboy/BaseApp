@@ -12,6 +12,8 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
@@ -19,12 +21,12 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.example.clouds.entry.WifiEntry;
-
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.example.clouds.constants.NetWorkConstants.REQUEST_CODE;
-import static com.example.clouds.constants.NetWorkConstants.REQUEST_CODE1;
 import static com.example.clouds.constants.NetWorkConstants.REQUEST_CODE_BACKGROUND_LOCATION;
 import static com.example.clouds.constants.NetWorkConstants.REQUEST_CODE_FINE_LOCATION;
 
@@ -38,8 +40,13 @@ public class NetWorkViewModel extends ViewModel {
     public MutableLiveData<List<WifiConfiguration>> wifiConfigList = new MutableLiveData<>();
     public MutableLiveData<String> isWifiConnected = new MutableLiveData<>();
     public MutableLiveData<Boolean> isWifiConnectSuccess = new MutableLiveData<>();
+    //断开连接
     public MutableLiveData<Boolean> isWifiDisConnected = new MutableLiveData<>();
+    //移除配置
     public MutableLiveData<Boolean> isWifiRemove = new MutableLiveData<>();
+    public MutableLiveData<List<ScanResult>> scanResultList = new MutableLiveData<>();
+    public List<ScanResult> mlistScan = new ArrayList<>();
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     public void initConnect(Context context) {
         if (mWifiManager == null) {
@@ -57,13 +64,73 @@ public class NetWorkViewModel extends ViewModel {
         //获取wifi开关初始状态
         boolean wifiEnabled = mWifiManager.isWifiEnabled();
         netWorkSwitch.setValue(wifiEnabled);
+        if (wifiEnabled) {
+            startScanWifi();
+            getScanResult();
+        }
+    }
+
+
+    public void getScanResult() {
+        if (mWifiManager != null) {
+            mlistScan.clear();
+            mlistScan = mWifiManager.getScanResults();
+            Set<String> uniqueSSIDs = new HashSet<>();
+            List<ScanResult> uniqueResults = new ArrayList<>();
+            //去除重复的wifi昵称
+            for (ScanResult result : mlistScan) {
+                String ssid = result.SSID;
+                if (!uniqueSSIDs.contains(ssid)) {
+                    uniqueSSIDs.add(ssid);
+                    uniqueResults.add(result);
+                }
+            }
+            scanResultList.setValue(uniqueResults);
+            Log.d(TAG, "刷新扫描wifi。。。...getScanResult = [" + uniqueResults + "]");
+        }
+    }
+
+
+//    public void getScanResult() {
+//        if (mWifiManager != null) {
+//            mlistScan.clear();
+//            mlistScan = mWifiManager.getScanResults();
+//            List<ScanResult> uniqueResults = new ArrayList<>();
+//            for (ScanResult result : mlistScan) {
+//                boolean isDuplicate = false;
+//                for (ScanResult uniqueResult : uniqueResults) {
+//                    if (result.SSID.equals(uniqueResult.SSID)) {
+//                        isDuplicate = true;
+//                        break;
+//                    }
+//                }
+//                if (!isDuplicate) {
+//                    uniqueResults.add(result);
+//                }
+//            }
+//            scanResultList.setValue(uniqueResults);
+//            Log.d(TAG, "刷新扫描wifi。。。...getScanResult = [" + uniqueResults + "]");
+//
+//        }
+//    }
+
+
+    /**
+     * 开始扫描 WIFI.
+     */
+    public void startScanWifi() {
+        Log.d(TAG, "开始扫描 WIFI.。。。...startScanWifi = 调用");
+
+        if (mWifiManager != null) {
+            mWifiManager.startScan();
+        }
     }
 
     /**
      * 移除已保存wifi
      */
 
-    public void removeConnectWifi(int networkId, Context context) {
+    public void removeConnectWifi(int networkId) {
         boolean removeNetwork = mWifiManager.removeNetwork(networkId);
         boolean saveConfiguration = mWifiManager.saveConfiguration();
         isWifiRemove.setValue(removeNetwork);

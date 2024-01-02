@@ -43,6 +43,7 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
         intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         registerReceiver(netWorkReceiver, intentFilter);
 
         //扫描WiFi列表适配器
@@ -53,8 +54,9 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
             }
         };
         mBinding.recyclerNetworkSearch.setLayoutManager(mSearchLayoutManager);
-        mNetworkSearchAdapter = new NetWorkSearchAdapter();
+        mNetworkSearchAdapter = new NetWorkSearchAdapter(this);
         mBinding.recyclerNetworkSearch.setAdapter(mNetworkSearchAdapter);
+
         //让recyclerview不能滑动
         mLayoutManager = new LinearLayoutManager(this) {
             @Override
@@ -84,15 +86,9 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
 
     @Override
     protected void initData() {
-        mViewModel.isWifiRemove.observe(this, values -> {
-            if (values) {
-                Log.d(TAG, "移除配置。。。: initData...isWifiRemove = [" + values + "]");
-            }
-        });
-        mViewModel.isWifiDisConnected.observe(this, values -> {
-            if (values) {
-                Log.d(TAG, "断开连接。。。: initData...isWifiDisConnected = [" + values + "]");
-            }
+        mViewModel.scanResultList.observe(this, list -> {
+            Log.d(TAG, "刷新扫描wifi。。。: initData...scanResultList = [" + list + "]");
+            mNetworkSearchAdapter.setList(list);
         });
 
         mViewModel.isWifiConnectSuccess.observe(this, values -> {
@@ -101,18 +97,29 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
                 mNetworkConnectAdapter.notifyDataSetChanged();
             }
         });
+
         mViewModel.isWifiConnected.observe(this, values -> {
             if (values != null) {
                 mNetworkConnectAdapter.getisWifiConnected(values);
-                Log.d(TAG, "当前连接WiFi: isWifiConnected = [" + values + "]");
+                Log.d(TAG, "当前连接WiFi。。。: initData...isWifiConnected = [" + values + "]");
             }
         });
+
+        //wifi总开关
         mViewModel.netWorkSwitch.observe(this, enable -> {
             isNetworkSwitch = enable;
+            handler.postDelayed(() -> {
+                mViewModel.getStatus();
+            }, 1500);
+            Log.d(TAG, "wifi总开关。。。: initData...netWorkSwitch = [" + enable + "]");
+            Log.d(TAG, "刷新扫描wifi。。。: initData = [" + enable + "]");
+
             mBinding.networkButtonSwitch.setChecked(enable);
             showNetworkView(enable);
         });
-        mViewModel.wifiConfigList.observe(this, list -> {
+        mViewModel.wifiConfigList.observe(this, list ->
+
+        {
             Log.d(TAG, "initData: " + list);
             if (list != null) {
                 mNetworkConnectAdapter.setListWifi(list);
@@ -148,7 +155,6 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
     public void onWifiStateChange(boolean enabled) {
         mViewModel.netWorkSwitch.setValue(enabled);
         Log.d(TAG, "开关状态。。。: onWifiStateChange = [" + enabled + "]");
-
     }
 
     @Override
@@ -163,10 +169,6 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
         Log.d(TAG, "断开连接。。。: onWifiDisConnected = [" + enabled + "]");
     }
 
-    @Override
-    public void onWifiRemove(boolean enabled) {
-//        mViewModel.isWifiRemove.setValue(enabled);
-    }
 
     //根据wifi开关显示列表
     private void showNetworkView(boolean enabled) {

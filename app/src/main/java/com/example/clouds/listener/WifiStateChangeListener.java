@@ -6,6 +6,5 @@ public interface WifiStateChangeListener {
     void onWifiConnectSuccess(boolean enabled);
 
     void onWifiDisConnected(boolean enabled);
-
-    void onWifiRemove(boolean enabled);
+//    void onWifiScanResult(boolean enabled);
 }
