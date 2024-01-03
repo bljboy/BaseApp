@@ -21,6 +21,8 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.clouds.utils.Utils;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -32,21 +34,19 @@ import static com.example.clouds.constants.NetWorkConstants.REQUEST_CODE_FINE_LO
 
 public class NetWorkViewModel extends ViewModel {
     private static final String TAG = "NetWorkViewModel";
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private static final long SCAN_INTERVAL_30S = 10000; // 10秒
     private WifiManager mWifiManager;
     private WifiInfo mWifiInfo;
     private NetworkInfo networkInfo;
     private ConnectivityManager mConnectivityManager;
-    public MutableLiveData<Boolean> netWorkSwitch = new MutableLiveData<>();
-    public MutableLiveData<List<WifiConfiguration>> wifiConfigList = new MutableLiveData<>();
-    public MutableLiveData<String> isWifiConnected = new MutableLiveData<>();
-    public MutableLiveData<Boolean> isWifiConnectSuccess = new MutableLiveData<>();
-    //断开连接
-    public MutableLiveData<Boolean> isWifiDisConnected = new MutableLiveData<>();
-    //移除配置
-    public MutableLiveData<Boolean> isWifiRemove = new MutableLiveData<>();
-    public MutableLiveData<List<ScanResult>> scanResultList = new MutableLiveData<>();
-    public List<ScanResult> mlistScan = new ArrayList<>();
-    private Handler handler = new Handler(Looper.getMainLooper());
+    public MutableLiveData<Boolean> netWorkSwitch = new MutableLiveData<>();//WiFi总开关
+    public MutableLiveData<List<WifiConfiguration>> wifiConfigList = new MutableLiveData<>();//WiFi配置
+    public MutableLiveData<String> isWifiConnected = new MutableLiveData<>();//已连接
+    public MutableLiveData<Boolean> isWifiConnectSuccess = new MutableLiveData<>();//连接成功
+    public MutableLiveData<Boolean> isWifiDisConnected = new MutableLiveData<>();//断开连接
+    public MutableLiveData<Boolean> isWifiRemove = new MutableLiveData<>();//移除配置
+    public MutableLiveData<List<ScanResult>> scanResultList = new MutableLiveData<>();//附近热点
 
     public void initConnect(Context context) {
         if (mWifiManager == null) {
@@ -64,63 +64,131 @@ public class NetWorkViewModel extends ViewModel {
         //获取wifi开关初始状态
         boolean wifiEnabled = mWifiManager.isWifiEnabled();
         netWorkSwitch.setValue(wifiEnabled);
-        if (wifiEnabled) {
-            startScanWifi();
-            getScanResult();
-        }
     }
 
+    private final Runnable scanRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (mWifiManager != null && mWifiManager.isWifiEnabled()) {
+                startScanWifi();
+                getScanResult();
+            }
+            handler.postDelayed(this, SCAN_INTERVAL_30S);
+        }
+    };
 
+    //10s定时扫描一次wifi
+    public void setHandler() {
+        handler.post(scanRunnable);
+    }
+
+    public void removeCallbacks() {
+        handler.removeCallbacks(scanRunnable);
+    }
+
+    /**
+     * 输入密码。连接附近wifi热点
+     */
+    public void connectToWifi(String ssid, String password) {
+        WifiConfiguration wifiConfig = new WifiConfiguration();
+        wifiConfig.SSID = String.format("\"%s\"", ssid);
+
+        if (password != null && !password.equals("")) {
+            // WPA/WPA2 PSK WiFi
+            wifiConfig.preSharedKey = String.format("\"%s\"", password);
+        } else {
+            // Open WiFi (无需密码)
+            wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+        }
+        // 添加新的WiFi配置
+        int netId = mWifiManager.addNetwork(wifiConfig);
+        mWifiManager.disconnect();
+        mWifiManager.enableNetwork(netId, true);
+        mWifiManager.reconnect();
+        Log.d(TAG, "输入密码。连接附近wifi热点...+”+“connectToWifi = 调用");
+        refreshWifiList();
+    }
+
+    /**
+     * 获取附近WiFi热点
+     */
+    @SuppressLint("MissingPermission")
     public void getScanResult() {
         if (mWifiManager != null) {
-            mlistScan.clear();
-            mlistScan = mWifiManager.getScanResults();
-            Set<String> uniqueSSIDs = new HashSet<>();
-            List<ScanResult> uniqueResults = new ArrayList<>();
-            //去除重复的wifi昵称
-            for (ScanResult result : mlistScan) {
-                String ssid = result.SSID;
-                if (!uniqueSSIDs.contains(ssid)) {
-                    uniqueSSIDs.add(ssid);
-                    uniqueResults.add(result);
+            List<ScanResult> originalScanResults = mWifiManager.getScanResults();
+            Set<String> configuredSSIDs = new HashSet<>();
+
+            // 获取已保存网络的SSID，并存储在HashSet以快速查找
+            List<WifiConfiguration> configuredNetworks = mWifiManager.getConfiguredNetworks();
+            if (configuredNetworks != null) {
+                for (WifiConfiguration config : configuredNetworks) {
+                    configuredSSIDs.add(Utils.trimQuotes(config.SSID));
                 }
             }
-            scanResultList.setValue(uniqueResults);
-            Log.d(TAG, "刷新扫描wifi。。。...getScanResult = [" + uniqueResults + "]");
+            // 使用HashSet来存储唯一的SSID
+            Set<String> uniqueSSIDs = new HashSet<>();
+            List<ScanResult> uniqueScanResults = new ArrayList<>();
+            for (ScanResult result : originalScanResults) {
+                String ssid = result.SSID;
+                if (!uniqueSSIDs.contains(ssid) && !configuredSSIDs.contains(ssid)) {
+                    uniqueSSIDs.add(ssid);
+                    uniqueScanResults.add(result);
+                }
+            }
+            // 更新LiveData或者进行其他UI操作
+            scanResultList.setValue(uniqueScanResults);
         }
     }
 
-
+    /**
+     * 获取附近WiFi热点
+     */
+//    @SuppressLint("MissingPermission")
 //    public void getScanResult() {
 //        if (mWifiManager != null) {
 //            mlistScan.clear();
+//            uniqueSSIDs.clear();
 //            mlistScan = mWifiManager.getScanResults();
+//            Log.d(TAG, "获取附近WiFi热点。。。...getScanResult mlistScan = " + mlistScan);
 //            List<ScanResult> uniqueResults = new ArrayList<>();
-//            for (ScanResult result : mlistScan) {
-//                boolean isDuplicate = false;
-//                for (ScanResult uniqueResult : uniqueResults) {
-//                    if (result.SSID.equals(uniqueResult.SSID)) {
-//                        isDuplicate = true;
-//                        break;
+//            //去除重复的wifi昵称
+//            //筛除已保存的wifi配置热点
+//            if (mWifiManager.getConfiguredNetworks().size() > 0) {
+//                for (WifiConfiguration configuration : mWifiManager.getConfiguredNetworks()) {
+//                    for (ScanResult result : mlistScan) {
+//                        // 获取扫描到的 WiFi 热点的 SSID
+//                        String ssid = result.SSID;
+//                        // 获取已保存的 WiFi 配置的 SSID
+//                        String configuredSSID = configuration.SSID;
+//                        if (!uniqueSSIDs.contains(ssid)) {
+//                            uniqueSSIDs.add(ssid);
+//                            uniqueResults.add(result);
+//                        }
+//                        if (("\"" + result.SSID + "\"").equals(configuredSSID)) {
+//                            uniqueResults.remove(result);
+//                        }
 //                    }
 //                }
-//                if (!isDuplicate) {
-//                    uniqueResults.add(result);
+//            } else {
+//                for (ScanResult result : mlistScan) {
+//                    // 获取扫描到的 WiFi 热点的 SSID
+//                    String ssid = result.SSID;
+//                    if (!uniqueSSIDs.contains(ssid)) {
+//                        uniqueSSIDs.add(ssid);
+//                        uniqueResults.add(result);
+//                    }
 //                }
 //            }
 //            scanResultList.setValue(uniqueResults);
-//            Log.d(TAG, "刷新扫描wifi。。。...getScanResult = [" + uniqueResults + "]");
-//
+//            Log.d(TAG, "获取附近WiFi热点。。。...getScanResult.size = " + uniqueResults.size() + " , getScanResult = [" + uniqueResults + "]");
 //        }
 //    }
-
 
     /**
      * 开始扫描 WIFI.
      */
     public void startScanWifi() {
         Log.d(TAG, "开始扫描 WIFI.。。。...startScanWifi = 调用");
-
         if (mWifiManager != null) {
             mWifiManager.startScan();
         }
@@ -129,7 +197,6 @@ public class NetWorkViewModel extends ViewModel {
     /**
      * 移除已保存wifi
      */
-
     public void removeConnectWifi(int networkId) {
         boolean removeNetwork = mWifiManager.removeNetwork(networkId);
         boolean saveConfiguration = mWifiManager.saveConfiguration();
@@ -164,12 +231,14 @@ public class NetWorkViewModel extends ViewModel {
      *
      * @param value
      */
-    public void setConnectWifi(int value) {
+    public void setConnectWifi(int value, String name) {
         mWifiManager.enableNetwork(value, true);
         networkInfo = mConnectivityManager.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
             String ssid = mWifiInfo.getSSID();
-            isWifiConnected.setValue(ssid);
+            if (ssid.equals(name)) {
+                isWifiConnected.postValue(ssid);
+            }
             Log.d(TAG, "当前连接WiFi: getConnected1 = [" + ssid + "]");
         }
         Log.d(TAG, "设置连接WiFi: setConnectWifi = [" + value + "]");
@@ -212,7 +281,7 @@ public class NetWorkViewModel extends ViewModel {
     public void getConnectionInfo() {
         // 检查权限
         @SuppressLint("MissingPermission") List<WifiConfiguration> wifiConfigurationList = mWifiManager.getConfiguredNetworks();
-        wifiConfigList.setValue(wifiConfigurationList);
+        wifiConfigList.postValue(wifiConfigurationList);
         Log.d(TAG, "获取已连接过的wifi数组: wifiConfigurationList = [" + wifiConfigurationList + "]");
     }
 

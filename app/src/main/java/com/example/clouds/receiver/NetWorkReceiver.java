@@ -50,13 +50,12 @@ public class NetWorkReceiver extends BroadcastReceiver {
                     listener.onWifiDisConnected(true);
                 }
             }
-        }
-//        else if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(intent.getAction())) {
+        } else if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(intent.getAction())) {
 //            int wifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
 //            if (wifiState == WifiManager.WIFI_STATE_ENABLED) {
 //                // WiFi 开关已打开，执行一次扫描操作
 //
 //            }
-//        }
+        }
     }
 }

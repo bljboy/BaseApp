@@ -3,7 +3,6 @@ package com.example.clouds.adapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.wifi.ScanResult;
-import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,6 +15,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.clouds.R;
+import com.example.clouds.ui.network.NetWorkViewModel;
+import com.example.clouds.utils.DialogNetWork;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -26,17 +27,18 @@ public class NetWorkSearchAdapter extends RecyclerView.Adapter<NetWorkSearchAdap
     private static final String TAG = "NetWorkSearchAdapter";
     private List<ScanResult> mlist;
     private Context mContext;
+    private NetWorkViewModel mViewModel;
 
-    public NetWorkSearchAdapter(Context context) {
+    public NetWorkSearchAdapter(Context context, NetWorkViewModel model) {
         this.mContext = context;
         this.mlist = new ArrayList<>();
+        this.mViewModel = model;
     }
 
     public void setList(List<ScanResult> list) {
+        Log.d(TAG, "获取扫描列表WiFi数量...setList = [" + list.size() + "]");
         this.mlist.clear();
-        if (list.size() > 0) {
-            this.mlist = list;
-        }
+        this.mlist = list;
         notifyDataSetChanged();
     }
 
@@ -52,12 +54,8 @@ public class NetWorkSearchAdapter extends RecyclerView.Adapter<NetWorkSearchAdap
     @Override
     public void onBindViewHolder(@NonNull @NotNull NetWorkSearchAdapter.MyViewHolder holder, int position) {
         //设置wifi昵称
-        String ssid = mlist.get(position).SSID;
-        int level = mlist.get(position).level;
-        holder.recycler_network_name.setText(ssid);
-        int signalLevel = WifiManager.calculateSignalLevel(level, 5);
-        Log.d(TAG, "onBindViewHolder: " + "ssid:" + ssid);
-        Log.d(TAG, "onBindViewHolder: " + "level:" + level);
+        holder.recycler_network_name.setText(mlist.get(position).SSID);
+        int signalLevel = WifiManager.calculateSignalLevel(mlist.get(position).level, 5);
         switch (signalLevel) {
             case 4:
                 holder.recycler_network_icon.setBackground(mContext.getResources().getDrawable(R.drawable.set_wifi_icon_4));
@@ -71,7 +69,19 @@ public class NetWorkSearchAdapter extends RecyclerView.Adapter<NetWorkSearchAdap
             default:
                 holder.recycler_network_icon.setBackground(mContext.getResources().getDrawable(R.drawable.set_wifi_icon_1));
         }
+        holder.recycler_network_list.setOnClickListener(v -> {
+            ScanResult selectedWifi = mlist.get(position);
+            // 检查是否加密
+            if (isWifiEncrypted(selectedWifi)) {
+                // WiFi被加密，弹出对话框要求输入密码
+                showPasswordDialog(selectedWifi.SSID);
+            } else {
+                // WiFi未加密，直接连接
+                mViewModel.connectToWifi(selectedWifi.SSID, null);
+            }
+        });
     }
+
 
     @Override
     public int getItemCount() {
@@ -83,11 +93,22 @@ public class NetWorkSearchAdapter extends RecyclerView.Adapter<NetWorkSearchAdap
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView recycler_network_name;
         public TextView recycler_network_icon;
+        public ConstraintLayout recycler_network_list;
 
         public MyViewHolder(View v) {
             super(v);
             recycler_network_name = v.findViewById(R.id.recycler_network_name);
             recycler_network_icon = v.findViewById(R.id.recycler_network_icon);
+            recycler_network_list = v.findViewById(R.id.recycler_network_list);
         }
+    }
+
+    private boolean isWifiEncrypted(ScanResult wifi) {
+        return wifi.capabilities.contains("WEP") || wifi.capabilities.contains("PSK") || wifi.capabilities.contains("EAP");
+    }
+
+    private void showPasswordDialog(String ssid) {
+        DialogNetWork.showFullScreenDialog(mContext, mViewModel, ssid);
+
     }
 }

@@ -7,4 +7,13 @@ public class Utils {
         }
         return name;
     }
+    /**
+     * 去除字符串首尾的引号
+     */
+    public static String trimQuotes(String str) {
+        if (str != null) {
+            str = str.replaceAll("^\"|\"$", "");
+        }
+        return str;
+    }
 }

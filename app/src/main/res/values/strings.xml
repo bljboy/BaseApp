@@ -22,5 +22,7 @@
     <string name="network_disconnect_title">未连接</string>
     <string name="network_disconnect_details">断开此设备</string>
     <string name="network_connect_details">连接此设备</string>
+    <string name="enter_password">请输入密码</string>
+    <string name="confirm">确定</string>
 
 </resources>

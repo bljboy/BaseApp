@@ -35,22 +35,14 @@ public class NetWorkConnectAdapter extends RecyclerView.Adapter<NetWorkConnectAd
         this.mlist = new ArrayList<>();
     }
 
-    public void getisWifiConnected(String value) {
+    public void getWifiConnected(String value) {
         this.mWifiName = value;
-        Log.d(TAG, "getisWifiConnected: " + value);
     }
 
     public void setListWifi(List<WifiConfiguration> wifiEntityList) {
         Log.d(TAG, "setListWifi: " + wifiEntityList);
         this.mlist = wifiEntityList;
         notifyDataSetChanged();
-        //自测代码，无需提交
-//        for (WifiConfiguration configuration : wifiEntityList) {
-//            ssid = configuration.SSID;
-//            networkId = configuration.networkId;
-//            Log.d(TAG, "setListWifi: " + "ssid:" + ssid);
-//            Log.d(TAG, "setListWifi: " + "networkId:" + networkId);
-//        }
     }
 
     @NonNull
@@ -87,12 +79,10 @@ public class NetWorkConnectAdapter extends RecyclerView.Adapter<NetWorkConnectAd
         //连接设备或断开设备按钮
         holder.recycler_network_connect.setOnClickListener(v -> {
             if (!isConnected) {
-                mViewModel.setConnectWifi(mlist.get(position).networkId);
-                mViewModel.isWifiConnected.postValue(mlist.get(position).SSID);
+                mViewModel.setConnectWifi(mlist.get(position).networkId, mlist.get(position).SSID);
                 Log.d(TAG, "onBindViewHolder: " + "setConnectWifi1:" + mlist.get(position).networkId);
             } else {
                 mViewModel.setDisConnectWifi(mlist.get(position).networkId);
-                mViewModel.isWifiConnected.postValue(mlist.get(position).SSID);
                 Log.d(TAG, "onBindViewHolder: " + "setConnectWifi2:" + mlist.get(position).networkId);
             }
         });
@@ -100,12 +90,9 @@ public class NetWorkConnectAdapter extends RecyclerView.Adapter<NetWorkConnectAd
         //设置wifi详情点击展开
         final boolean isExpanded = position == expandedPosition;
         holder.recycler_network_details.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
-        holder.recycler_network_list.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                expandedPosition = isExpanded ? -1 : position; // 切换展开的位置
-                notifyDataSetChanged();
-            }
+        holder.recycler_network_list.setOnClickListener(v -> {
+            expandedPosition = isExpanded ? -1 : position; // 切换展开的位置
+            notifyDataSetChanged();
         });
     }
 

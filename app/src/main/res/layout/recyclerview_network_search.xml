@@ -7,7 +7,7 @@
     android:layout_marginTop="@dimen/recycler_network_25dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout"
+        android:id="@+id/recycler_network_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:ignore="MissingConstraints">
