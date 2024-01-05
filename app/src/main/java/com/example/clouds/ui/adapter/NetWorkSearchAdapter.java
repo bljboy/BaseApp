@@ -69,6 +69,7 @@ public class NetWorkSearchAdapter extends RecyclerView.Adapter<NetWorkSearchAdap
             default:
                 holder.recycler_network_icon.setBackground(mContext.getResources().getDrawable(R.drawable.set_wifi_icon_1));
         }
+
         holder.recycler_network_list.setOnClickListener(v -> {
             ScanResult selectedWifi = mlist.get(position);
             // 检查是否加密

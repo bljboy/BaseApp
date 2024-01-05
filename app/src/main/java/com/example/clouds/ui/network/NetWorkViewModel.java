@@ -24,6 +24,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.clouds.utils.Utils;
+import com.tencent.mmkv.MMKV;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -46,7 +47,6 @@ public class NetWorkViewModel extends ViewModel {
     public MutableLiveData<Boolean> netWorkSwitch = new MutableLiveData<>();//WiFi总开关
     public MutableLiveData<List<WifiConfiguration>> wifiConfigList = new MutableLiveData<>();//WiFi配置
     public MutableLiveData<String> isWifiConnected = new MutableLiveData<>();//已连接wifi昵称
-    public MutableLiveData<Integer> WifiConnectedId = new MutableLiveData<>();//已连接wifi ID
     public MutableLiveData<Boolean> isWifiConnectSuccess = new MutableLiveData<>();//连接成功
     public MutableLiveData<Boolean> isWifiDisConnected = new MutableLiveData<>();//断开连接
     public MutableLiveData<Boolean> isWifiRemove = new MutableLiveData<>();//移除配置
@@ -102,6 +102,7 @@ public class NetWorkViewModel extends ViewModel {
             wifiConfig.preSharedKey = String.format("\"%s\"", password);
         } else {
             // Open WiFi (无需密码)
+            isWifiConnected.setValue(null);
             wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         }
         // 添加新的WiFi配置
@@ -109,7 +110,7 @@ public class NetWorkViewModel extends ViewModel {
         mWifiManager.disconnect();
         mWifiManager.enableNetwork(netId, true);
         mWifiManager.reconnect();
-        Log.d(TAG, "输入密码。连接附近wifi热点...+”+“connectToWifi = 调用");
+        isWifiConnected.setValue(null);
         refreshWifiList();
     }
 
@@ -182,28 +183,25 @@ public class NetWorkViewModel extends ViewModel {
      */
 
     public void setDisConnectWifi(int value) {
+        isWifiConnected.setValue(null);
         mWifiManager.disableNetwork(value);
         mWifiManager.disconnect();
         Log.d(TAG, "断开连接WiFi: setDisConnectWifi = [" + value + "]");
     }
 
     /**
+     *
+     */
+
+    /**
      * 连接设备WiFi
      *
      * @param value
      */
-    public void setConnectWifi(int value, String name) {
+    public void setConnectWifi(int value, String ssid) {
+        isWifiConnected.setValue(null);
         mWifiManager.enableNetwork(value, true);
-        this.WifiConnectedId.setValue(value);
-        networkInfo = mConnectivityManager.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected()) {
-            String ssid = mWifiInfo.getSSID();
-            if (ssid.equals(name)) {
-                isWifiConnected.postValue(ssid);
-            }
-            Log.d(TAG, "设置连接WiFi: setConnectWifi = [" + ssid + "]");
-        }
-        Log.d(TAG, "设置连接WiFi: setConnectWifi = [" + value + "]");
+        Log.d(TAG, "setConnectWifi: " + "name" + ssid);
     }
 
     /**
@@ -232,6 +230,7 @@ public class NetWorkViewModel extends ViewModel {
     public void setWifiEnabled(boolean enabled) {
         Log.d(TAG, "设置wifi开关总状态: enable = [" + enabled + "]");
         mWifiManager.setWifiEnabled(enabled);
+        isWifiConnected.setValue(null);
         getStatus();
     }
 
@@ -243,7 +242,7 @@ public class NetWorkViewModel extends ViewModel {
     public void getConnectionInfo() {
         // 检查权限
         @SuppressLint("MissingPermission") List<WifiConfiguration> wifiConfigurationList = mWifiManager.getConfiguredNetworks();
-        wifiConfigList.postValue(wifiConfigurationList);
+        wifiConfigList.setValue(wifiConfigurationList);
         Log.d(TAG, "获取已连接过的wifi数组: wifiConfigurationList = [" + wifiConfigurationList + "]");
     }
 

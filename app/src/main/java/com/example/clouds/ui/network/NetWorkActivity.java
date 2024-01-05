@@ -1,28 +1,33 @@
 package com.example.clouds.ui.network;
 
-import androidx.annotation.NonNull;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.Network;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.clouds.R;
-import com.example.clouds.entry.WifiConnectedList;
+import com.example.clouds.base.BaseActivity;
+import com.example.clouds.databinding.ActivityNetworkBinding;
+import com.example.clouds.entry.WifiConnectedEntry;
+import com.example.clouds.listener.WifiStateChangeListener;
+import com.example.clouds.receiver.NetWorkReceiver;
 import com.example.clouds.ui.adapter.NetWorkConnectAdapter;
 import com.example.clouds.ui.adapter.NetWorkSearchAdapter;
-import com.example.clouds.base.BaseActivity;
-import com.example.clouds.receiver.NetWorkReceiver;
-import com.example.clouds.databinding.ActivityNetworkBinding;
-import com.example.clouds.listener.WifiStateChangeListener;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -40,7 +45,7 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
     private NetWorkViewModel mViewModel;
     private boolean isNetworkSwitch = true;
     private Handler handler = new Handler(Looper.getMainLooper());
-    private List<WifiConnectedList> mList = new ArrayList<WifiConnectedList>();
+    private List<WifiConnectedEntry> mList = new ArrayList<WifiConnectedEntry>();
     private String ssid;
 
     @Override
@@ -51,12 +56,14 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
     @Override
     protected void initView() {
         //WiFi开关按钮广播WiFi状态
+        netWorkReceiver = new NetWorkReceiver(this);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         registerReceiver(netWorkReceiver, intentFilter);
+
 
         //扫描WiFi列表适配器
         mSearchLayoutManager = new LinearLayoutManager(this);
@@ -82,18 +89,29 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
         mBinding.buttonBack.setOnClickListener(this);
         mBinding.networkButtonSwitch.setOnClickListener(this);
 
-        mViewModel.registerNetworkCallback(new ConnectivityManager.NetworkCallback() {
-            @Override
-            public void onAvailable(@NonNull @NotNull Network network) {
-                super.onAvailable(network);
-
-            }
-
-            @Override
-            public void onLost(@NonNull @NotNull Network network) {
-                super.onLost(network);
-            }
-        });
+//        mViewModel.registerNetworkCallback(new ConnectivityManager.NetworkCallback() {
+//            @Override
+//            public void onAvailable(@NonNull @NotNull Network network) {
+//                super.onAvailable(network);
+//                Log.d(TAG, "onAvailable: " + network.toString());
+//                runOnUiThread(() -> {
+//                    if (mNetworkConnectAdapter != null) {
+//                        mNetworkConnectAdapter.getWifiConnected(true);
+//                    }
+//                });
+//            }
+//
+//            @Override
+//            public void onLost(@NonNull @NotNull Network network) {
+//                super.onLost(network);
+//                Log.d(TAG, "onLost: " + network);
+//                runOnUiThread(() -> {
+//                    if (mNetworkConnectAdapter != null) {
+//                        mNetworkConnectAdapter.getWifiConnected(false);
+//                    }
+//                });
+//            }
+//        });
     }
 
     @Override
@@ -101,19 +119,13 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
         mViewModel = new ViewModelProvider(this, new ViewModelProvider.NewInstanceFactory()).get(NetWorkViewModel.class);
         mViewModel.checkPermissions(this);
         mViewModel.initConnect(this);
-        netWorkReceiver = new NetWorkReceiver(this);
     }
 
     @Override
     protected void initData() {
-        mViewModel.WifiConnectedId.observe(this, values -> {
-            mNetworkConnectAdapter.notifyItemChanged(values);
-        });
-
-        mViewModel.isWifiDisConnected.observe(this, values -> {
-            mBinding.recyclerNetworkConnect.post(() -> {
-                mNetworkConnectAdapter.notifyDataSetChanged();
-            });
+        //当点击不同的wifi，操作：连接或断开连接，对适配器传入ssid，连接title做更新
+        mViewModel.isWifiConnected.observe(this, values -> {
+            mNetworkConnectAdapter.getWifiConnected(null);
         });
 
         //刷新扫描wifi
@@ -121,14 +133,6 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
             mNetworkSearchAdapter.setList(list);
         });
 
-        //正在连接中
-        mViewModel.isWifiConnectSuccess.observe(this, values -> {
-        });
-        //当前连接WiFi
-        mViewModel.isWifiConnected.observe(this, values -> {
-            ssid = values;
-            mNetworkConnectAdapter.getWifiConnected(values);
-        });
 
         //wifi总开关
         mViewModel.netWorkSwitch.observe(this, enable -> {
@@ -139,11 +143,13 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
 
         //已连接过的wifi配置信息列表
         mViewModel.wifiConfigList.observe(this, list -> {
+            mList.clear();
             if (list != null) {
                 for (WifiConfiguration wc : list) {
-                    WifiConnectedList wifiConnectedList = new WifiConnectedList();
-                    wifiConnectedList.setSSID(wc.SSID);
-                    mList.add(wifiConnectedList);
+                    WifiConnectedEntry wifiConnectedEntry = new WifiConnectedEntry();
+                    wifiConnectedEntry.setSSID(wc.SSID);
+                    wifiConnectedEntry.setNetworkID(wc.networkId);
+                    mList.add(wifiConnectedEntry);
                 }
                 mNetworkConnectAdapter.setListWifi(mList);
             }
@@ -191,15 +197,19 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
 
     @Override
     public void onWifiConnectSuccess(boolean enabled) {
-        mViewModel.isWifiConnectSuccess.setValue(enabled);
-        mNetworkConnectAdapter.updateWifiConnectionStatus(ssid, enabled);
-        Log.d(TAG, "正在连接中。。。: onWifiConnecting = [" + enabled + "]");
+        WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        String ssid = wifiInfo.getSSID();
+        // 更新状态或UI
+        mNetworkConnectAdapter.getWifiConnected(ssid);
+        mNetworkConnectAdapter.getWifiConnected(enabled);
+        Log.d(TAG, "onReceive: ssid..." + ssid);
+//        Log.d(TAG, "是否连接成功。。。: onWifiConnectSuccess = [" + enabled + "]");
     }
 
     @Override
     public void onWifiDisConnected(boolean enabled) {
-        mViewModel.isWifiDisConnected.setValue(enabled);
-        Log.d(TAG, "断开连接。。。: onWifiDisConnected = [" + enabled + "]");
+//        Log.d(TAG, "是否断开连接。。。: onWifiDisConnected = [" + enabled + "]");
     }
 
 
@@ -210,5 +220,6 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
         mBinding.networkOtherTitle.setVisibility(enabled ? View.VISIBLE : View.GONE);
         mBinding.networkButtonRefresh.setVisibility(enabled ? View.VISIBLE : View.GONE);
     }
+
 
 }

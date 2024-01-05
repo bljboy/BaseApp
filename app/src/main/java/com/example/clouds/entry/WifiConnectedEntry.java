@@ -1,6 +1,6 @@
 package com.example.clouds.entry;
 
-public class WifiConnectedList {
+public class WifiConnectedEntry {
     private String SSID;
 
     public int getNetworkID() {

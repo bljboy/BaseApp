@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.util.Log;
 
 import com.example.clouds.listener.WifiStateChangeListener;
 
@@ -39,19 +41,15 @@ public class NetWorkReceiver extends BroadcastReceiver {
             }
         } else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(intent.getAction())) {
             NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-            if (null != info) {
-                NetworkInfo.DetailedState state = info.getDetailedState();
-                //连接中。。。
-                if (state == NetworkInfo.DetailedState.CONNECTING) {
-                    listener.onWifiConnectSuccess(false);
-                    //连接成功
-                } else if (state == NetworkInfo.DetailedState.CONNECTED) {
-                    listener.onWifiConnectSuccess(true);
-                } else if (state == NetworkInfo.DetailedState.DISCONNECTED) {
-                    listener.onWifiDisConnected(true);
-                }
+            if (info != null && info.isConnected()) {
+                // WiFi已连接
+                listener.onWifiConnectSuccess(true);
+                // ...
+            } else if (info != null && info.getState() == NetworkInfo.State.DISCONNECTED) {
+                // WiFi已断开
+                // 更新状态或UI
+                // ...
             }
-        } else if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
 
         }
     }
