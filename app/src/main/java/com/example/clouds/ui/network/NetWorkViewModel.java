@@ -6,7 +6,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
+import android.net.Network;
 import android.net.NetworkInfo;
+import android.net.NetworkRequest;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
@@ -40,9 +42,11 @@ public class NetWorkViewModel extends ViewModel {
     private WifiInfo mWifiInfo;
     private NetworkInfo networkInfo;
     private ConnectivityManager mConnectivityManager;
+    private ConnectivityManager.NetworkCallback mNetworkCallback;
     public MutableLiveData<Boolean> netWorkSwitch = new MutableLiveData<>();//WiFi总开关
     public MutableLiveData<List<WifiConfiguration>> wifiConfigList = new MutableLiveData<>();//WiFi配置
-    public MutableLiveData<String> isWifiConnected = new MutableLiveData<>();//已连接
+    public MutableLiveData<String> isWifiConnected = new MutableLiveData<>();//已连接wifi昵称
+    public MutableLiveData<Integer> WifiConnectedId = new MutableLiveData<>();//已连接wifi ID
     public MutableLiveData<Boolean> isWifiConnectSuccess = new MutableLiveData<>();//连接成功
     public MutableLiveData<Boolean> isWifiDisConnected = new MutableLiveData<>();//断开连接
     public MutableLiveData<Boolean> isWifiRemove = new MutableLiveData<>();//移除配置
@@ -140,49 +144,6 @@ public class NetWorkViewModel extends ViewModel {
         }
     }
 
-    /**
-     * 获取附近WiFi热点
-     */
-//    @SuppressLint("MissingPermission")
-//    public void getScanResult() {
-//        if (mWifiManager != null) {
-//            mlistScan.clear();
-//            uniqueSSIDs.clear();
-//            mlistScan = mWifiManager.getScanResults();
-//            Log.d(TAG, "获取附近WiFi热点。。。...getScanResult mlistScan = " + mlistScan);
-//            List<ScanResult> uniqueResults = new ArrayList<>();
-//            //去除重复的wifi昵称
-//            //筛除已保存的wifi配置热点
-//            if (mWifiManager.getConfiguredNetworks().size() > 0) {
-//                for (WifiConfiguration configuration : mWifiManager.getConfiguredNetworks()) {
-//                    for (ScanResult result : mlistScan) {
-//                        // 获取扫描到的 WiFi 热点的 SSID
-//                        String ssid = result.SSID;
-//                        // 获取已保存的 WiFi 配置的 SSID
-//                        String configuredSSID = configuration.SSID;
-//                        if (!uniqueSSIDs.contains(ssid)) {
-//                            uniqueSSIDs.add(ssid);
-//                            uniqueResults.add(result);
-//                        }
-//                        if (("\"" + result.SSID + "\"").equals(configuredSSID)) {
-//                            uniqueResults.remove(result);
-//                        }
-//                    }
-//                }
-//            } else {
-//                for (ScanResult result : mlistScan) {
-//                    // 获取扫描到的 WiFi 热点的 SSID
-//                    String ssid = result.SSID;
-//                    if (!uniqueSSIDs.contains(ssid)) {
-//                        uniqueSSIDs.add(ssid);
-//                        uniqueResults.add(result);
-//                    }
-//                }
-//            }
-//            scanResultList.setValue(uniqueResults);
-//            Log.d(TAG, "获取附近WiFi热点。。。...getScanResult.size = " + uniqueResults.size() + " , getScanResult = [" + uniqueResults + "]");
-//        }
-//    }
 
     /**
      * 开始扫描 WIFI.
@@ -233,13 +194,14 @@ public class NetWorkViewModel extends ViewModel {
      */
     public void setConnectWifi(int value, String name) {
         mWifiManager.enableNetwork(value, true);
+        this.WifiConnectedId.setValue(value);
         networkInfo = mConnectivityManager.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
             String ssid = mWifiInfo.getSSID();
             if (ssid.equals(name)) {
                 isWifiConnected.postValue(ssid);
             }
-            Log.d(TAG, "当前连接WiFi: getConnected1 = [" + ssid + "]");
+            Log.d(TAG, "设置连接WiFi: setConnectWifi = [" + ssid + "]");
         }
         Log.d(TAG, "设置连接WiFi: setConnectWifi = [" + value + "]");
     }
@@ -303,5 +265,18 @@ public class NetWorkViewModel extends ViewModel {
                     new String[]{Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.CHANGE_WIFI_STATE},
                     REQUEST_CODE);
         }
+    }
+
+    public void registerNetworkCallback(ConnectivityManager.NetworkCallback callback) {
+        this.mNetworkCallback = callback;
+        NetworkRequest.Builder builder = new NetworkRequest.Builder();
+        mConnectivityManager.registerNetworkCallback(builder.build(), mNetworkCallback);
+
+    }
+
+    public void unregisterNetworkCallback() {
+        if (mNetworkCallback == null) return;
+        mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
+        mNetworkCallback = null;
     }
 }

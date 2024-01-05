@@ -1,7 +1,6 @@
-package com.example.clouds.adapter;
+package com.example.clouds.ui.adapter;
 
 import android.content.Context;
-import android.net.wifi.WifiConfiguration;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +12,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.clouds.R;
+import com.example.clouds.entry.WifiConnectedList;
 import com.example.clouds.ui.network.NetWorkViewModel;
 
 import org.jetbrains.annotations.NotNull;
@@ -24,26 +24,43 @@ public class NetWorkConnectAdapter extends RecyclerView.Adapter<NetWorkConnectAd
 
     private static final String TAG = "NetWorkConnectAdapter";
     private int expandedPosition = -1; // -1表示没有选中的item
-    private List<WifiConfiguration> mlist;
+    private List<WifiConnectedList> mWifiConnectedList;
     private NetWorkViewModel mViewModel;
-    private Context mContext;
     private String mWifiName;
 
     public NetWorkConnectAdapter(NetWorkViewModel model, Context context) {
         this.mViewModel = model;
-        this.mContext = context;
-        this.mlist = new ArrayList<>();
+        this.mWifiConnectedList = new ArrayList<>();
     }
 
     public void getWifiConnected(String value) {
         this.mWifiName = value;
     }
 
-    public void setListWifi(List<WifiConfiguration> wifiEntityList) {
-        Log.d(TAG, "setListWifi: " + wifiEntityList);
-        this.mlist = wifiEntityList;
-        notifyDataSetChanged();
+
+    public void updateWifiConnectionStatus(String SSID, boolean isConnected) {
+        if (mWifiConnectedList.size() > 0) {
+            for (int i = 0; i < mWifiConnectedList.size(); i++) {
+                WifiConnectedList item = mWifiConnectedList.get(i);
+                if (item.getSSID().equals(SSID)) {
+                    item.setConnected(isConnected);
+                    notifyDataSetChanged();
+                    break;
+                }
+            }
+        }
     }
+
+    public void setListWifi(List<WifiConnectedList> list) {
+        this.mWifiConnectedList = list;
+        Log.d(TAG, "setlist: " + list.size());
+    }
+
+//    public void setListWifi(List<WifiConfiguration> wifiEntityList) {
+//        Log.d(TAG, "setListWifi: " + wifiEntityList);
+//        this.mlist = wifiEntityList;
+//        notifyDataSetChanged();
+//    }
 
     @NonNull
     @NotNull
@@ -55,14 +72,15 @@ public class NetWorkConnectAdapter extends RecyclerView.Adapter<NetWorkConnectAd
 
     @Override
     public void onBindViewHolder(@NonNull @NotNull NetWorkConnectAdapter.MyViewHolder holder, int position) {
+        WifiConnectedList item = mWifiConnectedList.get(position);
         //设置wifi昵称
-        String ssid = mlist.get(position).SSID;
+        String ssid = item.getSSID();
         holder.recycler_network_name.setText(ssid);
         Log.d(TAG, "onBindViewHolder: " + "ssid:" + ssid);
         boolean isConnected = ssid.equals(mWifiName);
 
         //设置已保存的wifi，是已连接还是未连接
-        if (isConnected) {
+        if (item.isConnected()) {
             holder.recycler_network_title.setText(R.string.network_connect_title);
             holder.recycler_network_connect.setText(R.string.network_disconnect_details);
         } else {
@@ -72,18 +90,25 @@ public class NetWorkConnectAdapter extends RecyclerView.Adapter<NetWorkConnectAd
 
         //移除已保存wifi
         holder.recycler_network_ignore.setOnClickListener(v -> {
-            Log.d(TAG, "onBindViewHolder: " + "removeConnectWifi:" + mlist.get(position).networkId);
-            mViewModel.removeConnectWifi(mlist.get(position).networkId);
+            Log.d(TAG, "onBindViewHolder: " + "removeConnectWifi:" + item.getNetworkID());
+            mViewModel.removeConnectWifi(item.getNetworkID());
         });
 
         //连接设备或断开设备按钮
         holder.recycler_network_connect.setOnClickListener(v -> {
             if (!isConnected) {
-                mViewModel.setConnectWifi(mlist.get(position).networkId, mlist.get(position).SSID);
-                Log.d(TAG, "onBindViewHolder: " + "setConnectWifi1:" + mlist.get(position).networkId);
+                mViewModel.setConnectWifi(item.getNetworkID(), item.getSSID());
+                Log.d(TAG, "onBindViewHolder: " + "setConnectWifi1:" + item.getNetworkID());
             } else {
-                mViewModel.setDisConnectWifi(mlist.get(position).networkId);
-                Log.d(TAG, "onBindViewHolder: " + "setConnectWifi2:" + mlist.get(position).networkId);
+                mViewModel.setDisConnectWifi(item.getNetworkID());
+                Log.d(TAG, "onBindViewHolder: " + "setConnectWifi2:" + item.getNetworkID());
+            }
+            if (item.isConnected()) {
+                holder.recycler_network_title.setText(R.string.network_connect_title);
+                holder.recycler_network_connect.setText(R.string.network_disconnect_details);
+            } else {
+                holder.recycler_network_title.setText(R.string.network_disconnect_title);
+                holder.recycler_network_connect.setText(R.string.network_connect_details);
             }
         });
 
@@ -98,7 +123,7 @@ public class NetWorkConnectAdapter extends RecyclerView.Adapter<NetWorkConnectAd
 
     @Override
     public int getItemCount() {
-        return mlist.size();
+        return mWifiConnectedList.size();
     }
 
 

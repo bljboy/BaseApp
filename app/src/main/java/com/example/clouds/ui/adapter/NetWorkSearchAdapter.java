@@ -1,4 +1,4 @@
-package com.example.clouds.adapter;
+package com.example.clouds.ui.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
