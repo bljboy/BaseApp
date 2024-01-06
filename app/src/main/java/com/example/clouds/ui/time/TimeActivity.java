@@ -1,6 +1,7 @@
 package com.example.clouds.ui.time;
 
 import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.RadioGroup;
@@ -11,7 +12,9 @@ import com.example.clouds.R;
 import com.example.clouds.base.BaseActivity;
 import com.example.clouds.databinding.ActivityTimeBinding;
 import com.example.clouds.ui.network.NetWorkViewModel;
+import com.example.clouds.utils.DateTimeUtils;
 
+import java.io.IOException;
 import java.util.Calendar;
 
 public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements View.OnClickListener, RadioGroup.OnCheckedChangeListener {
@@ -60,6 +63,7 @@ public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements V
         mBinding.timeDown.setOnClickListener(this);
         mBinding.timeAmPm.setOnClickListener(this);
         mBinding.time1224.setOnClickListener(this);
+        mBinding.buttonOk.setOnClickListener(this);
     }
 
     @Override
@@ -88,35 +92,35 @@ public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements V
             INDEX_YEAR = value;
             Log.d(TAG, "initData: " + "year:" + INDEX_YEAR);
             mBinding.timeYear.post(() -> {
-                mBinding.timeYear.setText(String.valueOf(value));
+                mBinding.timeYear.setText(DateTimeUtils.YearFormat(value));
             });
         });
         mViewModel.month.observe(this, value -> {
             INDEX_MONTH = value;
             Log.d(TAG, "initData: " + "month:" + INDEX_MONTH);
             mBinding.timeMonth.post(() -> {
-                mBinding.timeMonth.setText(String.valueOf(value));
+                mBinding.timeMonth.setText(DateTimeUtils.MonthFormat(value));
             });
         });
         mViewModel.day.observe(this, value -> {
             INDEX_DAY = value;
             Log.d(TAG, "initData: " + "day:" + INDEX_DAY);
             mBinding.timeDay.post(() -> {
-                mBinding.timeDay.setText(String.valueOf(value));
+                mBinding.timeDay.setText(DateTimeUtils.DayFormat(value));
             });
         });
         mViewModel.hour.observe(this, value -> {
             INDEX_HOUR = value;
             Log.d(TAG, "initData: " + "hour:" + INDEX_HOUR);
             mBinding.timeHour.post(() -> {
-                mBinding.timeHour.setText(String.valueOf(value));
+                mBinding.timeHour.setText(DateTimeUtils.HourFormat(value));
             });
         });
         mViewModel.minute.observe(this, value -> {
             INDEX_MINUTES = value;
             Log.d(TAG, "initData: " + "minute:" + INDEX_MINUTES);
             mBinding.timeMinutes.post(() -> {
-                mBinding.timeMinutes.setText(String.valueOf(value));
+                mBinding.timeMinutes.setText(DateTimeUtils.MinuteFormat(value));
             });
         });
 
@@ -125,28 +129,6 @@ public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements V
     @Override
     protected void loadData() {
         mViewModel.getStatus();
-    }
-
-    @SuppressLint("NonConstantResourceId")
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.button_back:
-                finish();
-                break;
-            case R.id.time_up:
-                setTimeUp();
-                break;
-            case R.id.time_down:
-                setTimeDown();
-                break;
-            case R.id.time_am_pm:
-                setTimeAmPm();
-                break;
-            case R.id.time_12_24:
-                setmTime12_24();
-                break;
-        }
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -171,6 +153,42 @@ public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements V
         }
     }
 
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.button_back:
+                finish();
+                break;
+            case R.id.time_up:
+                setTimeUp();
+                break;
+            case R.id.time_down:
+                setTimeDown();
+                break;
+            case R.id.time_am_pm:
+                setTimeAmPm();
+                break;
+            case R.id.time_12_24:
+                setmTime12_24();
+                break;
+            case R.id.button_ok:
+                setAllOk();
+                break;
+        }
+    }
+
+    private void setAllOk() {
+        int yearText = Integer.parseInt(mBinding.timeYear.getText().toString().trim());
+        int monthText = Integer.parseInt(mBinding.timeMonth.getText().toString().trim());
+        int timeDayText = Integer.parseInt(mBinding.timeDay.getText().toString().trim());
+        int timeHourText = Integer.parseInt(mBinding.timeHour.getText().toString().trim());
+        int timeMinutesText = Integer.parseInt(mBinding.timeMinutes.getText().toString().trim());
+        mViewModel.setSystemDateTime(yearText, monthText, timeDayText,timeHourText,timeMinutesText);
+//        mViewModel.setDate(yearText, monthText, timeDayText,timeHourText,timeMinutesText);
+
+    }
+
     //设置12或24小时时间格式
     private void setmTime12_24() {
         is24Hour = !is24Hour;
@@ -187,38 +205,39 @@ public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements V
     private void setTimeUp() {
         if (mBinding.timeDay.isChecked()) {
             if (INDEX_DAY >= 1 && INDEX_DAY <= 31)
-                mBinding.timeDay.setText(String.valueOf(INDEX_DAY++));
+                mBinding.timeDay.setText(DateTimeUtils.DayFormat(INDEX_DAY++));
         } else if (mBinding.timeMonth.isChecked()) {
             if (INDEX_MONTH >= 1 && INDEX_MONTH <= 12)
-                mBinding.timeMonth.setText(String.valueOf(INDEX_MONTH++));
+                mBinding.timeMonth.setText(DateTimeUtils.MonthFormat(INDEX_MONTH++));
         } else if (mBinding.timeYear.isChecked()) {
-            if (INDEX_YEAR >= 2020 && INDEX_YEAR <= 2050)
-                mBinding.timeYear.setText(String.valueOf(INDEX_YEAR++));
+            if (INDEX_YEAR >= 2008 && INDEX_YEAR <= 2050)
+                mBinding.timeYear.setText(DateTimeUtils.MonthFormat(INDEX_YEAR++));
         } else if (mBinding.timeHour.isChecked()) {
             if (INDEX_HOUR >= 1 && INDEX_HOUR <= 24)
-                mBinding.timeHour.setText(String.valueOf(INDEX_HOUR++));
+                mBinding.timeHour.setText(DateTimeUtils.MonthFormat(INDEX_HOUR++));
         } else if (mBinding.timeMinutes.isChecked()) {
             if (INDEX_MINUTES >= 1 && INDEX_MINUTES <= 60)
-                mBinding.timeMinutes.setText(String.valueOf(INDEX_MINUTES++));
+                mBinding.timeMinutes.setText(DateTimeUtils.MonthFormat(INDEX_MINUTES++));
         }
     }
 
     private void setTimeDown() {
         if (mBinding.timeDay.isChecked()) {
             if (INDEX_DAY > 1)
-                mBinding.timeDay.setText(String.valueOf(--INDEX_DAY));
+                mBinding.timeDay.setText(DateTimeUtils.MonthFormat(--INDEX_DAY));
         } else if (mBinding.timeMonth.isChecked()) {
             if (INDEX_MONTH > 1)
-                mBinding.timeMonth.setText(String.valueOf(--INDEX_MONTH));
+                mBinding.timeMonth.setText(DateTimeUtils.MonthFormat(--INDEX_MONTH));
         } else if (mBinding.timeYear.isChecked()) {
-            if (INDEX_YEAR > 2020)
-                mBinding.timeYear.setText(String.valueOf(--INDEX_YEAR));
+            if (INDEX_YEAR > 2008)
+                mBinding.timeYear.setText(DateTimeUtils.MonthFormat(--INDEX_YEAR));
         } else if (mBinding.timeHour.isChecked()) {
             if (INDEX_HOUR > 1)
-                mBinding.timeHour.setText(String.valueOf(--INDEX_HOUR));
+                mBinding.timeHour.setText(DateTimeUtils.MonthFormat(--INDEX_HOUR));
         } else if (mBinding.timeMinutes.isChecked()) {
             if (INDEX_MINUTES > 1)
-                mBinding.timeMinutes.setText(String.valueOf(--INDEX_MINUTES));
+                mBinding.timeMinutes.setText(DateTimeUtils.MonthFormat(--INDEX_MINUTES));
         }
     }
+
 }

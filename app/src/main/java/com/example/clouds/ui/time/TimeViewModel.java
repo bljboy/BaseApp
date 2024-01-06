@@ -1,13 +1,22 @@
 package com.example.clouds.ui.time;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.AlarmManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.text.format.DateFormat;
 import android.util.Log;
 
+import androidx.annotation.RequiresPermission;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.Calendar;
 
 public class TimeViewModel extends ViewModel {
@@ -22,7 +31,7 @@ public class TimeViewModel extends ViewModel {
     public MutableLiveData<Boolean> is24Hour = new MutableLiveData<>();
     public MutableLiveData<Integer> AMorPM = new MutableLiveData<>();
     @SuppressLint("StaticFieldLeak")
-    private Context mContext;
+    private static Context mContext;
 
     public void initConnet(Context context) {
         calendar = Calendar.getInstance();
@@ -47,5 +56,74 @@ public class TimeViewModel extends ViewModel {
         Log.d(TAG, "getStatus: " + "is24Hour:" + is24Hour.getValue());
         Log.d(TAG, "getStatus: " + "AMorPM:" + AMorPM);
     }
+
+    /**
+     * 设置系统日期，需要有系统签名才可以
+     */
+
+    /**
+     * 使用root权限设置系统日期
+     *
+     * @param year  年份
+     * @param month 月份
+     * @param day   日
+     */
+
+    public  void setSystemDateTime(int year, int month, int day, int hour, int minute) {
+        try {
+            Process suProcess = Runtime.getRuntime().exec("su");
+            DataOutputStream os = new DataOutputStream(suProcess.getOutputStream());
+            // 生成日期和时间设置命令
+            @SuppressLint("DefaultLocale") String command = String.format("date %02d%02d%02d%02d%02d; \n",
+                    month, day, hour, minute, year % 100);
+            // 执行命令
+            os.writeBytes(command);
+            os.flush();
+            // 退出su
+            os.writeBytes("exit\n");
+            os.flush();
+            try {
+                suProcess.waitFor();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            os.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 设置系统时间，需要有系统签名才可以
+     */
+    public void setDate(int year, int month, int day, int hour, int minute) {
+        // 检查权限
+        if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.SET_TIME) != PackageManager.PERMISSION_GRANTED) {
+            if (mContext instanceof Activity) {
+                ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.SET_TIME}, 123);
+            } else {
+                Log.e(TAG, "Context is not an instance of Activity, cannot request permissions.");
+            }
+            return;
+        }
+        new Thread(() -> {
+            try {
+                Calendar calendar = Calendar.getInstance();
+//                calendar.set(Calendar.YEAR, year);
+//                calendar.set(Calendar.MONTH, month); // 注意：月份是从0开始的
+//                calendar.set(Calendar.DAY_OF_MONTH, day);
+//                calendar.set(Calendar.HOUR_OF_DAY, day);
+                calendar.set(year, month - 1, day, hour, minute);
+                long timeInMillis = calendar.getTimeInMillis();
+                if (timeInMillis / 1000 < Integer.MAX_VALUE) {
+                    ((AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE)).setTime(timeInMillis);
+                    Log.d(TAG, "setDate: " + year + "," + month + "," + day);
+                }
+            } catch (SecurityException e) {
+                Log.e(TAG, "Failed to set system time. Permission denied.", e);
+            }
+        }).start();
+    }
+
 
 }
