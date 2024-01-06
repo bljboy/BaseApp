@@ -21,8 +21,8 @@
 
     <TextView
         android:id="@+id/time_up"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
         android:layout_marginTop="50dp"
         android:background="@drawable/time_up"
         app:layout_constraintEnd_toEndOf="parent"
@@ -32,8 +32,8 @@
 
     <TextView
         android:id="@+id/time_down"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
         android:layout_marginBottom="50dp"
         android:background="@drawable/time_down"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -55,7 +55,7 @@
         <RadioButton
             android:id="@+id/time_day"
             style="@style/TimeTheme"
-            android:layout_width="100dp"
+            android:layout_width="70dp"
             android:layout_height="50dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -66,7 +66,7 @@
         <RadioButton
             android:id="@+id/time_month"
             style="@style/TimeTheme"
-            android:layout_width="100dp"
+            android:layout_width="70dp"
             android:layout_height="50dp"
             android:background="@drawable/rounded_line"
             tools:ignore="MissingConstraints" />
@@ -74,7 +74,7 @@
         <RadioButton
             android:id="@+id/time_year"
             style="@style/TimeTheme"
-            android:layout_width="100dp"
+            android:layout_width="70dp"
             android:layout_height="50dp"
             android:background="@drawable/rounded_line"
             tools:ignore="MissingConstraints" />
@@ -82,7 +82,7 @@
         <RadioButton
             android:id="@+id/time_hour"
             style="@style/TimeTheme"
-            android:layout_width="100dp"
+            android:layout_width="70dp"
             android:layout_height="50dp"
             android:layout_marginStart="50dp"
             tools:ignore="MissingConstraints" />
@@ -90,7 +90,7 @@
         <RadioButton
             android:id="@+id/time_minutes"
             style="@style/TimeTheme"
-            android:layout_width="100dp"
+            android:layout_width="70dp"
             android:layout_height="50dp"
             tools:ignore="MissingConstraints" />
     </RadioGroup>
@@ -98,7 +98,7 @@
     <RadioButton
         android:id="@+id/time_am_pm"
         style="@style/TimeTheme"
-        android:layout_width="100dp"
+        android:layout_width="70dp"
         android:layout_height="50dp"
         app:layout_constraintStart_toEndOf="@+id/time_rg"
         app:layout_constraintTop_toTopOf="@+id/time_rg"
@@ -107,7 +107,7 @@
     <RadioButton
         android:id="@+id/time_12_24"
         style="@style/TimeTheme"
-        android:layout_width="100dp"
+        android:layout_width="70dp"
         android:layout_height="50dp"
         app:layout_constraintStart_toEndOf="@+id/time_am_pm"
         app:layout_constraintTop_toTopOf="@+id/time_am_pm"

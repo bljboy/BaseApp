@@ -24,5 +24,7 @@
     <string name="network_connect_details">连接此设备</string>
     <string name="enter_password">请输入密码</string>
     <string name="confirm">确定</string>
+    <string name="string_24hour">24</string>
+    <string name="string_12hour">12</string>
 
 </resources>

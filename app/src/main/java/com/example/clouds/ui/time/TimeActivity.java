@@ -1,31 +1,22 @@
 package com.example.clouds.ui.time;
 
 import android.annotation.SuppressLint;
-import android.content.pm.PackageManager;
+import android.content.Context;
 import android.util.Log;
 import android.view.View;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.clouds.R;
 import com.example.clouds.base.BaseActivity;
 import com.example.clouds.databinding.ActivityTimeBinding;
-import com.example.clouds.ui.network.NetWorkViewModel;
 import com.example.clouds.utils.DateTimeUtils;
-
-import java.io.IOException;
-import java.util.Calendar;
 
 public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements View.OnClickListener, RadioGroup.OnCheckedChangeListener {
 
     private static final String TAG = "TimeActivity";
-    private String[] mDayArrays = null;
-    private String[] mHour12Arrays = null;
-    private String[] mHour24Arrays = null;
-    private String[] mMinuteArrays = null;
-    private String[] mMonthArrays = null;
-    private String[] mYearArrays = null;
     private String[] mAmPmArrays = null;
     private String[] mTime12_24Arrays = null;
     private int INDEX_DAY = 0;
@@ -34,7 +25,6 @@ public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements V
     private int INDEX_HOUR = 0;
     private int INDEX_MINUTES = 0;
     private int INDEX_AMPM = 0;
-    private int INDEX_12_24 = 0;
     private boolean is24Hour;
     private TimeViewModel mViewModel;
 
@@ -45,12 +35,6 @@ public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements V
 
     @Override
     protected void initView() {
-//        mDayArrays = getResources().getStringArray(R.array.day_time);
-//        mHour12Arrays = getResources().getStringArray(R.array.hour_time12);
-//        mHour24Arrays = getResources().getStringArray(R.array.hour_time24);
-//        mMinuteArrays = getResources().getStringArray(R.array.minute_time);
-//        mMonthArrays = getResources().getStringArray(R.array.month_timev2);
-//        mYearArrays = getResources().getStringArray(R.array.year_time);
         mAmPmArrays = getResources().getStringArray(R.array.half_day);
         mTime12_24Arrays = getResources().getStringArray(R.array.time_12_24);
     }
@@ -99,28 +83,28 @@ public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements V
             INDEX_MONTH = value;
             Log.d(TAG, "initData: " + "month:" + INDEX_MONTH);
             mBinding.timeMonth.post(() -> {
-                mBinding.timeMonth.setText(DateTimeUtils.MonthFormat(value));
+                mBinding.timeMonth.setText(DateTimeUtils.DateFormat(value));
             });
         });
         mViewModel.day.observe(this, value -> {
             INDEX_DAY = value;
             Log.d(TAG, "initData: " + "day:" + INDEX_DAY);
             mBinding.timeDay.post(() -> {
-                mBinding.timeDay.setText(DateTimeUtils.DayFormat(value));
+                mBinding.timeDay.setText(DateTimeUtils.DateFormat(value));
             });
         });
         mViewModel.hour.observe(this, value -> {
             INDEX_HOUR = value;
             Log.d(TAG, "initData: " + "hour:" + INDEX_HOUR);
             mBinding.timeHour.post(() -> {
-                mBinding.timeHour.setText(DateTimeUtils.HourFormat(value));
+                mBinding.timeHour.setText(DateTimeUtils.DateFormat(value));
             });
         });
         mViewModel.minute.observe(this, value -> {
             INDEX_MINUTES = value;
             Log.d(TAG, "initData: " + "minute:" + INDEX_MINUTES);
             mBinding.timeMinutes.post(() -> {
-                mBinding.timeMinutes.setText(DateTimeUtils.MinuteFormat(value));
+                mBinding.timeMinutes.setText(DateTimeUtils.DateFormat(value));
             });
         });
 
@@ -184,7 +168,14 @@ public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements V
         int timeDayText = Integer.parseInt(mBinding.timeDay.getText().toString().trim());
         int timeHourText = Integer.parseInt(mBinding.timeHour.getText().toString().trim());
         int timeMinutesText = Integer.parseInt(mBinding.timeMinutes.getText().toString().trim());
-        mViewModel.setSystemDateTime(yearText, monthText, timeDayText,timeHourText,timeMinutesText);
+        String AMorPM = mBinding.timeAmPm.getText().toString().trim();
+        String is12_24 = mBinding.time1224.getText().toString().trim();
+        boolean flag = is12_24.equals(getString(R.string.string_24hour));
+        int time12Hour = DateTimeUtils.set12Hour(is12_24, AMorPM, this, timeHourText);
+        if (is12_24.equals(getString(R.string.string_12hour))) {
+            timeHourText = time12Hour;
+        }
+        mViewModel.setSystemDateTime(yearText, monthText, timeDayText, timeHourText, timeMinutesText, flag);
 //        mViewModel.setDate(yearText, monthText, timeDayText,timeHourText,timeMinutesText);
 
     }
@@ -192,51 +183,76 @@ public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements V
     //设置12或24小时时间格式
     private void setmTime12_24() {
         is24Hour = !is24Hour;
-        mBinding.time1224.setText(is24Hour ? mTime12_24Arrays[1] : mTime12_24Arrays[0]);
+        mBinding.time1224.setText(is24Hour ? getString(R.string.string_24hour) : getString(R.string.string_12hour));
+        int timeHourText = Integer.parseInt(mBinding.timeHour.getText().toString().trim());
+        String isAMorPM = mBinding.timeAmPm.getText().toString();
+        int i = DateTimeUtils.updateHourDisplay(is24Hour, timeHourText, isAMorPM, this);
+        INDEX_HOUR = i;
+        mBinding.timeHour.setText(DateTimeUtils.DateFormat(i));
     }
 
     //设置上午或下午
     private void setTimeAmPm() {
-        INDEX_AMPM = 1 - INDEX_AMPM;
-        mBinding.timeAmPm.setText(mAmPmArrays[INDEX_AMPM]);
+        if (!is24Hour) {
+            INDEX_AMPM = 1 - INDEX_AMPM;
+            mBinding.timeAmPm.setText(INDEX_AMPM == 1 ? getString(R.string.string_pm) : getString(R.string.string_am));
+        }
     }
 
     //设置日期
     private void setTimeUp() {
         if (mBinding.timeDay.isChecked()) {
             if (INDEX_DAY >= 1 && INDEX_DAY <= 31)
-                mBinding.timeDay.setText(DateTimeUtils.DayFormat(INDEX_DAY++));
+                mBinding.timeDay.setText(INDEX_DAY == 31 ? DateTimeUtils.DateFormat(INDEX_DAY = 1)
+                        : DateTimeUtils.DateFormat(INDEX_DAY++));
         } else if (mBinding.timeMonth.isChecked()) {
             if (INDEX_MONTH >= 1 && INDEX_MONTH <= 12)
-                mBinding.timeMonth.setText(DateTimeUtils.MonthFormat(INDEX_MONTH++));
+                mBinding.timeMonth.setText(INDEX_MONTH == 12 ? DateTimeUtils.DateFormat(INDEX_MONTH = 1)
+                        : DateTimeUtils.DateFormat(INDEX_MONTH++));
         } else if (mBinding.timeYear.isChecked()) {
             if (INDEX_YEAR >= 2008 && INDEX_YEAR <= 2050)
-                mBinding.timeYear.setText(DateTimeUtils.MonthFormat(INDEX_YEAR++));
+                mBinding.timeYear.setText(DateTimeUtils.DateFormat(INDEX_YEAR++));
         } else if (mBinding.timeHour.isChecked()) {
-            if (INDEX_HOUR >= 1 && INDEX_HOUR <= 24)
-                mBinding.timeHour.setText(DateTimeUtils.MonthFormat(INDEX_HOUR++));
+            Log.d(TAG, "setTimeUp: INDEX_HOUR" + INDEX_HOUR);
+            if (is24Hour) {
+                if (INDEX_HOUR >= 0 && INDEX_HOUR <= 24)
+                    mBinding.timeHour.setText(INDEX_HOUR == 24 ? DateTimeUtils.DateFormat(INDEX_HOUR = 0)
+                            : DateTimeUtils.DateFormat(INDEX_HOUR++));
+            } else {
+                INDEX_HOUR = INDEX_HOUR % 12 + 1;
+                mBinding.timeHour.setText(DateTimeUtils.DateFormat(INDEX_HOUR));
+            }
         } else if (mBinding.timeMinutes.isChecked()) {
-            if (INDEX_MINUTES >= 1 && INDEX_MINUTES <= 60)
-                mBinding.timeMinutes.setText(DateTimeUtils.MonthFormat(INDEX_MINUTES++));
+            if (INDEX_MINUTES >= 0 && INDEX_MINUTES <= 60)
+                mBinding.timeMinutes.setText(INDEX_MINUTES == 60 ? DateTimeUtils.DateFormat(INDEX_MINUTES = 0)
+                        : DateTimeUtils.DateFormat(INDEX_MINUTES++));
         }
     }
 
     private void setTimeDown() {
         if (mBinding.timeDay.isChecked()) {
-            if (INDEX_DAY > 1)
-                mBinding.timeDay.setText(DateTimeUtils.MonthFormat(--INDEX_DAY));
+            if (INDEX_DAY >= 1)
+                mBinding.timeDay.setText(INDEX_DAY == 1 ? DateTimeUtils.DateFormat(INDEX_DAY = 31) : DateTimeUtils.DateFormat(--INDEX_DAY));
         } else if (mBinding.timeMonth.isChecked()) {
-            if (INDEX_MONTH > 1)
-                mBinding.timeMonth.setText(DateTimeUtils.MonthFormat(--INDEX_MONTH));
+            if (INDEX_MONTH >= 1)
+                mBinding.timeMonth.setText(INDEX_MONTH == 1 ? DateTimeUtils.DateFormat(INDEX_MONTH = 12)
+                        : DateTimeUtils.DateFormat(--INDEX_MONTH));
         } else if (mBinding.timeYear.isChecked()) {
             if (INDEX_YEAR > 2008)
-                mBinding.timeYear.setText(DateTimeUtils.MonthFormat(--INDEX_YEAR));
+                mBinding.timeYear.setText(DateTimeUtils.DateFormat(--INDEX_YEAR));
         } else if (mBinding.timeHour.isChecked()) {
-            if (INDEX_HOUR > 1)
-                mBinding.timeHour.setText(DateTimeUtils.MonthFormat(--INDEX_HOUR));
+            if (is24Hour) {
+                if (INDEX_HOUR >= 0)
+                    mBinding.timeHour.setText(INDEX_HOUR == 0 ? DateTimeUtils.DateFormat(INDEX_HOUR = 23)
+                            : DateTimeUtils.DateFormat(--INDEX_HOUR));
+            } else {
+                mBinding.timeHour.setText(INDEX_HOUR == 1 ? DateTimeUtils.DateFormat(INDEX_HOUR = 12)
+                        : DateTimeUtils.DateFormat(--INDEX_HOUR));
+            }
         } else if (mBinding.timeMinutes.isChecked()) {
-            if (INDEX_MINUTES > 1)
-                mBinding.timeMinutes.setText(DateTimeUtils.MonthFormat(--INDEX_MINUTES));
+            if (INDEX_MINUTES >= 0)
+                mBinding.timeMinutes.setText(INDEX_MINUTES == 0 ? DateTimeUtils.DateFormat(INDEX_MINUTES = 60)
+                        : DateTimeUtils.DateFormat(--INDEX_MINUTES));
         }
     }
 

@@ -17,7 +17,9 @@ import androidx.lifecycle.ViewModel;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 public class TimeViewModel extends ViewModel {
     private static final String TAG = "TimeViewModel";
@@ -32,6 +34,7 @@ public class TimeViewModel extends ViewModel {
     public MutableLiveData<Integer> AMorPM = new MutableLiveData<>();
     @SuppressLint("StaticFieldLeak")
     private static Context mContext;
+    SimpleDateFormat timeFormat;
 
     public void initConnet(Context context) {
         calendar = Calendar.getInstance();
@@ -42,11 +45,10 @@ public class TimeViewModel extends ViewModel {
         year.setValue(calendar.get(Calendar.YEAR));
         month.setValue(calendar.get(Calendar.MONTH) + 1); // 注意：月份是从0开始的
         day.setValue(calendar.get(Calendar.DAY_OF_MONTH));
-        hour.setValue(calendar.get(Calendar.HOUR_OF_DAY));
         minute.setValue(calendar.get(Calendar.MINUTE));
         second.setValue(calendar.get(Calendar.SECOND));
-        is24Hour.setValue(DateFormat.is24HourFormat(mContext));
         AMorPM.setValue(calendar.get(Calendar.AM_PM) == Calendar.AM ? 0 : 1);
+        is24Hour.setValue(DateFormat.is24HourFormat(mContext));
         Log.d(TAG, "getStatus: " + "year:" + year);
         Log.d(TAG, "getStatus: " + "month:" + month);
         Log.d(TAG, "getStatus: " + "day:" + day);
@@ -55,7 +57,25 @@ public class TimeViewModel extends ViewModel {
         Log.d(TAG, "getStatus: " + "second:" + second);
         Log.d(TAG, "getStatus: " + "is24Hour:" + is24Hour.getValue());
         Log.d(TAG, "getStatus: " + "AMorPM:" + AMorPM);
+
+        if (DateFormat.is24HourFormat(mContext)) {
+            // 24小时制
+//            timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+            hour.setValue(calendar.get(Calendar.HOUR_OF_DAY));
+        } else {
+            // 12小时制
+//            timeFormat = new SimpleDateFormat("hh", Locale.getDefault()); // 'a' 表示 AM/PM
+            int i = calendar.get(Calendar.HOUR);
+            if (i == 0) {
+                hour.setValue(12);
+            } else {
+                hour.setValue(i);
+                Log.d(TAG, "getStatus: i" + i);
+            }
+        }
+
     }
+
 
     /**
      * 设置系统日期，需要有系统签名才可以
@@ -69,10 +89,14 @@ public class TimeViewModel extends ViewModel {
      * @param day   日
      */
 
-    public  void setSystemDateTime(int year, int month, int day, int hour, int minute) {
+    public void setSystemDateTime(int year, int month, int day, int hour, int minute, boolean is24Hour) {
+        Log.d(TAG, "setSystemDateTime: is24Hour..." + is24Hour);
         try {
             Process suProcess = Runtime.getRuntime().exec("su");
             DataOutputStream os = new DataOutputStream(suProcess.getOutputStream());
+            //设置时间格式
+            String is12_24 = is24Hour ? "settings put system time_12_24 24\n" : "settings put system time_12_24 12\n";
+            os.writeBytes(is12_24);
             // 生成日期和时间设置命令
             @SuppressLint("DefaultLocale") String command = String.format("date %02d%02d%02d%02d%02d; \n",
                     month, day, hour, minute, year % 100);
