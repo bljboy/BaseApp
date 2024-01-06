@@ -43,7 +43,7 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
     private RecyclerView.LayoutManager mLayoutManager;
     private RecyclerView.LayoutManager mSearchLayoutManager;
     private NetWorkViewModel mViewModel;
-    private boolean isNetworkSwitch = true;
+    private boolean isNetworkSwitch;
     private Handler handler = new Handler(Looper.getMainLooper());
     private List<WifiConnectedEntry> mList = new ArrayList<WifiConnectedEntry>();
     private String ssid;
@@ -184,28 +184,14 @@ public class NetWorkActivity extends BaseActivity<ActivityNetworkBinding> implem
         if (v.getId() == R.id.button_back) {
             finish();
         } else if (v.getId() == R.id.network_button_switch) {
-            WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            if (!wifiManager.isWifiEnabled()) {
-                // 如果 WiFi 当前是关闭的，打开它
-                mViewModel.netWorkSwitch.setValue(true);
-                wifiManager.setWifiEnabled(true);
-                showNetworkView(true);
-            } else {
-                // 如果 WiFi 当前是打开的，关闭它
-                mViewModel.netWorkSwitch.setValue(false);
-                wifiManager.setWifiEnabled(false);
-                showNetworkView(false);
-            }
-            //wifi开关按钮
-//            showNetworkView(isNetworkSwitch);
-//            mViewModel.setWifiEnabled(!isNetworkSwitch);
+            showNetworkView(isNetworkSwitch);
+            mViewModel.setWifiEnabled();
         }
     }
 
     @Override
-    public void onWifiStateChange(boolean enabled) {
-//        mViewModel.netWorkSwitch.setValue(enabled);
-
+    public void onWifiSwitchStatus(boolean enabled) {
+        mViewModel.netWorkSwitch.setValue(enabled);
         Log.d(TAG, "开关状态。。。: onWifiStateChange = [" + enabled + "]");
     }
 

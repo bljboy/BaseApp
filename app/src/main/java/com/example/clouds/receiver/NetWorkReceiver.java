@@ -3,10 +3,8 @@ package com.example.clouds.receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.SupplicantState;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
@@ -33,10 +31,10 @@ public class NetWorkReceiver extends BroadcastReceiver {
             if (listener != null) {
                 switch (wifiState) {
                     case WifiManager.WIFI_STATE_ENABLED:
-                        listener.onWifiStateChange(true);
+                        listener.onWifiSwitchStatus(true);
                         break;
                     case WifiManager.WIFI_STATE_DISABLED:
-                        listener.onWifiStateChange(false);
+                        listener.onWifiSwitchStatus(false);
                         break;
                 }
             }

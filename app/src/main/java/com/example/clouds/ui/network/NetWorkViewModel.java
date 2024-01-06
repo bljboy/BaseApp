@@ -68,6 +68,7 @@ public class NetWorkViewModel extends ViewModel {
         //获取wifi开关初始状态
         boolean wifiEnabled = mWifiManager.isWifiEnabled();
         netWorkSwitch.setValue(wifiEnabled);
+        Log.d(TAG, "getStatus: " + "获取wifi开关初始状态：" + wifiEnabled);
     }
 
     private final Runnable scanRunnable = new Runnable() {
@@ -225,11 +226,19 @@ public class NetWorkViewModel extends ViewModel {
     /**
      * 设置wifi开关总状态
      *
-     * @param enabled
+     * @param
      */
-    public void setWifiEnabled(boolean enabled) {
-        Log.d(TAG, "设置wifi开关总状态: enable = [" + enabled + "]");
-        mWifiManager.setWifiEnabled(enabled);
+    public void setWifiEnabled() {
+//        Log.d(TAG, "设置wifi开关总状态: enable = [" + "]");
+        // 开启 WiFi
+        if (!mWifiManager.isWifiEnabled()) {
+            mWifiManager.setWifiEnabled(true);
+            netWorkSwitch.setValue(true);
+        } else {
+            mWifiManager.setWifiEnabled(false);
+            netWorkSwitch.setValue(false);
+        }
+        Log.d(TAG, "设置wifi开关总状态: enable = [" + mWifiManager.isWifiEnabled() + "]");
         isWifiConnected.setValue(null);
         getStatus();
     }
