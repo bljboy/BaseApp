@@ -45,11 +45,8 @@ public class NetWorkReceiver extends BroadcastReceiver {
             if (info != null && info.isConnected()) {
                 // WiFi已连接
                 listener.onWifiConnectSuccess(true);
-                // ...
             } else if (info != null && info.getState() == NetworkInfo.State.DISCONNECTED) {
                 // WiFi已断开
-                // 更新状态或UI
-                // ...
             }
         } else if (WifiManager.SUPPLICANT_STATE_CHANGED_ACTION.equals(intent.getAction())) {
             SupplicantState supplicantState = intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
