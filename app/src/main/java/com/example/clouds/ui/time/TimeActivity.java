@@ -32,6 +32,7 @@ public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements V
     private int INDEX_MINUTES = 0;
     private int INDEX_AMPM = 0;
     private int INDEX_12_24 = 0;
+    private boolean is24Hour;
     private TimeViewModel mViewModel;
 
     @Override
@@ -47,8 +48,8 @@ public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements V
 //        mMinuteArrays = getResources().getStringArray(R.array.minute_time);
 //        mMonthArrays = getResources().getStringArray(R.array.month_timev2);
 //        mYearArrays = getResources().getStringArray(R.array.year_time);
-//        mAmPmArrays = getResources().getStringArray(R.array.half_day);
-//        mTime12_24Arrays = getResources().getStringArray(R.array.time_12_24);
+        mAmPmArrays = getResources().getStringArray(R.array.half_day);
+        mTime12_24Arrays = getResources().getStringArray(R.array.time_12_24);
     }
 
     @Override
@@ -64,11 +65,25 @@ public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements V
     @Override
     protected void initViewModel() {
         mViewModel = new ViewModelProvider(this, new ViewModelProvider.NewInstanceFactory()).get(TimeViewModel.class);
-        mViewModel.initConnet();
+        mViewModel.initConnet(this);
     }
 
     @Override
     protected void initData() {
+        mViewModel.AMorPM.observe(this, value -> {
+            INDEX_AMPM = value;
+            Log.d(TAG, "initData: " + "AMorPM:" + value);
+            mBinding.timeAmPm.post(() -> {
+                mBinding.timeAmPm.setText(mAmPmArrays[value]);
+            });
+        });
+        mViewModel.is24Hour.observe(this, value -> {
+            is24Hour = value;
+            Log.d(TAG, "initData: " + "is24Hour:" + is24Hour);
+            mBinding.time1224.post(() -> {
+                mBinding.time1224.setText(value ? mTime12_24Arrays[1] : mTime12_24Arrays[0]);
+            });
+        });
         mViewModel.year.observe(this, value -> {
             INDEX_YEAR = value;
             Log.d(TAG, "initData: " + "year:" + INDEX_YEAR);
@@ -110,13 +125,6 @@ public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements V
     @Override
     protected void loadData() {
         mViewModel.getStatus();
-//        mBinding.timeDay.setText(mDayArrays[0]);
-//        mBinding.timeMonth.setText(mMonthArrays[0]);
-//        mBinding.timeYear.setText(mYearArrays[0]);
-//        mBinding.timeHour.setText(mHour24Arrays[0]);
-//        mBinding.timeMinutes.setText(mMinuteArrays[0]);
-//        mBinding.timeAmPm.setText(mAmPmArrays[0]);
-//        mBinding.time1224.setText(mTime12_24Arrays[0]);
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -165,8 +173,8 @@ public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements V
 
     //设置12或24小时时间格式
     private void setmTime12_24() {
-        INDEX_12_24 = 1 - INDEX_12_24;
-        mBinding.time1224.setText(mTime12_24Arrays[INDEX_12_24]);
+        is24Hour = !is24Hour;
+        mBinding.time1224.setText(is24Hour ? mTime12_24Arrays[1] : mTime12_24Arrays[0]);
     }
 
     //设置上午或下午
