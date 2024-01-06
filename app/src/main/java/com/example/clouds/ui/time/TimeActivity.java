@@ -1,15 +1,22 @@
 package com.example.clouds.ui.time;
 
 import android.annotation.SuppressLint;
+import android.util.Log;
 import android.view.View;
 import android.widget.RadioGroup;
+
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.clouds.R;
 import com.example.clouds.base.BaseActivity;
 import com.example.clouds.databinding.ActivityTimeBinding;
+import com.example.clouds.ui.network.NetWorkViewModel;
+
+import java.util.Calendar;
 
 public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements View.OnClickListener, RadioGroup.OnCheckedChangeListener {
 
+    private static final String TAG = "TimeActivity";
     private String[] mDayArrays = null;
     private String[] mHour12Arrays = null;
     private String[] mHour24Arrays = null;
@@ -25,6 +32,7 @@ public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements V
     private int INDEX_MINUTES = 0;
     private int INDEX_AMPM = 0;
     private int INDEX_12_24 = 0;
+    private TimeViewModel mViewModel;
 
     @Override
     protected ActivityTimeBinding getViewBinding() {
@@ -33,14 +41,14 @@ public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements V
 
     @Override
     protected void initView() {
-        mDayArrays = getResources().getStringArray(R.array.day_time);
-        mHour12Arrays = getResources().getStringArray(R.array.hour_time12);
-        mHour24Arrays = getResources().getStringArray(R.array.hour_time24);
-        mMinuteArrays = getResources().getStringArray(R.array.minute_time);
-        mMonthArrays = getResources().getStringArray(R.array.month_timev2);
-        mYearArrays = getResources().getStringArray(R.array.year_time);
-        mAmPmArrays = getResources().getStringArray(R.array.half_day);
-        mTime12_24Arrays = getResources().getStringArray(R.array.time_12_24);
+//        mDayArrays = getResources().getStringArray(R.array.day_time);
+//        mHour12Arrays = getResources().getStringArray(R.array.hour_time12);
+//        mHour24Arrays = getResources().getStringArray(R.array.hour_time24);
+//        mMinuteArrays = getResources().getStringArray(R.array.minute_time);
+//        mMonthArrays = getResources().getStringArray(R.array.month_timev2);
+//        mYearArrays = getResources().getStringArray(R.array.year_time);
+//        mAmPmArrays = getResources().getStringArray(R.array.half_day);
+//        mTime12_24Arrays = getResources().getStringArray(R.array.time_12_24);
     }
 
     @Override
@@ -55,23 +63,60 @@ public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements V
 
     @Override
     protected void initViewModel() {
-
+        mViewModel = new ViewModelProvider(this, new ViewModelProvider.NewInstanceFactory()).get(TimeViewModel.class);
+        mViewModel.initConnet();
     }
 
     @Override
     protected void initData() {
+        mViewModel.year.observe(this, value -> {
+            INDEX_YEAR = value;
+            Log.d(TAG, "initData: " + "year:" + INDEX_YEAR);
+            mBinding.timeYear.post(() -> {
+                mBinding.timeYear.setText(String.valueOf(value));
+            });
+        });
+        mViewModel.month.observe(this, value -> {
+            INDEX_MONTH = value;
+            Log.d(TAG, "initData: " + "month:" + INDEX_MONTH);
+            mBinding.timeMonth.post(() -> {
+                mBinding.timeMonth.setText(String.valueOf(value));
+            });
+        });
+        mViewModel.day.observe(this, value -> {
+            INDEX_DAY = value;
+            Log.d(TAG, "initData: " + "day:" + INDEX_DAY);
+            mBinding.timeDay.post(() -> {
+                mBinding.timeDay.setText(String.valueOf(value));
+            });
+        });
+        mViewModel.hour.observe(this, value -> {
+            INDEX_HOUR = value;
+            Log.d(TAG, "initData: " + "hour:" + INDEX_HOUR);
+            mBinding.timeHour.post(() -> {
+                mBinding.timeHour.setText(String.valueOf(value));
+            });
+        });
+        mViewModel.minute.observe(this, value -> {
+            INDEX_MINUTES = value;
+            Log.d(TAG, "initData: " + "minute:" + INDEX_MINUTES);
+            mBinding.timeMinutes.post(() -> {
+                mBinding.timeMinutes.setText(String.valueOf(value));
+            });
+        });
 
     }
 
     @Override
     protected void loadData() {
-        mBinding.timeDay.setText(mDayArrays[0]);
-        mBinding.timeMonth.setText(mMonthArrays[0]);
-        mBinding.timeYear.setText(mYearArrays[0]);
-        mBinding.timeHour.setText(mHour24Arrays[0]);
-        mBinding.timeMinutes.setText(mMinuteArrays[0]);
-        mBinding.timeAmPm.setText(mAmPmArrays[0]);
-        mBinding.time1224.setText(mTime12_24Arrays[0]);
+        mViewModel.getStatus();
+//        mBinding.timeDay.setText(mDayArrays[0]);
+//        mBinding.timeMonth.setText(mMonthArrays[0]);
+//        mBinding.timeYear.setText(mYearArrays[0]);
+//        mBinding.timeHour.setText(mHour24Arrays[0]);
+//        mBinding.timeMinutes.setText(mMinuteArrays[0]);
+//        mBinding.timeAmPm.setText(mAmPmArrays[0]);
+//        mBinding.time1224.setText(mTime12_24Arrays[0]);
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -133,49 +178,30 @@ public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements V
     //设置日期
     private void setTimeUp() {
         if (mBinding.timeDay.isChecked()) {
-            if (INDEX_DAY < mDayArrays.length - 1) {
-                mBinding.timeDay.setText(mDayArrays[++INDEX_DAY]);
-            }
+            mBinding.timeDay.setText(String.valueOf(++INDEX_DAY));
         } else if (mBinding.timeMonth.isChecked()) {
-            if (INDEX_MONTH < mMonthArrays.length - 1) {
-                mBinding.timeMonth.setText(mMonthArrays[++INDEX_MONTH]);
-            }
+            mBinding.timeMonth.setText(String.valueOf(++INDEX_MONTH));
         } else if (mBinding.timeYear.isChecked()) {
-            if (INDEX_YEAR < mYearArrays.length - 1) {
-                mBinding.timeYear.setText(mYearArrays[++INDEX_YEAR]);
-            }
+            mBinding.timeYear.setText(String.valueOf(++INDEX_YEAR));
         } else if (mBinding.timeHour.isChecked()) {
-            if (INDEX_HOUR < mHour24Arrays.length - 1) {
-                mBinding.timeHour.setText(mHour24Arrays[++INDEX_HOUR]);
-            }
+            mBinding.timeHour.setText(String.valueOf(++INDEX_HOUR));
         } else if (mBinding.timeMinutes.isChecked()) {
-            if (INDEX_MINUTES < mMinuteArrays.length - 1) {
-                mBinding.timeMinutes.setText(mMinuteArrays[++INDEX_MINUTES]);
-            }
+            mBinding.timeMinutes.setText(String.valueOf(++INDEX_MINUTES));
+
         }
     }
 
     private void setTimeDown() {
         if (mBinding.timeDay.isChecked()) {
-            if (INDEX_DAY > 0) {
-                mBinding.timeDay.setText(mDayArrays[--INDEX_DAY]);
-            }
+            mBinding.timeDay.setText(String.valueOf(--INDEX_DAY));
         } else if (mBinding.timeMonth.isChecked()) {
-            if (INDEX_MONTH > 0) {
-                mBinding.timeMonth.setText(mMonthArrays[--INDEX_MONTH]);
-            }
+            mBinding.timeMonth.setText(String.valueOf(--INDEX_MONTH));
         } else if (mBinding.timeYear.isChecked()) {
-            if (INDEX_YEAR > 0) {
-                mBinding.timeYear.setText(mYearArrays[--INDEX_YEAR]);
-            }
+            mBinding.timeYear.setText(String.valueOf(--INDEX_YEAR));
         } else if (mBinding.timeHour.isChecked()) {
-            if (INDEX_HOUR > 0) {
-                mBinding.timeHour.setText(mHour24Arrays[--INDEX_HOUR]);
-            }
+            mBinding.timeHour.setText(String.valueOf(--INDEX_HOUR));
         } else if (mBinding.timeMinutes.isChecked()) {
-            if (INDEX_MINUTES > 0) {
-                mBinding.timeMinutes.setText(mMinuteArrays[--INDEX_MINUTES]);
-            }
+            mBinding.timeMinutes.setText(String.valueOf(--INDEX_MINUTES));
         }
     }
 }

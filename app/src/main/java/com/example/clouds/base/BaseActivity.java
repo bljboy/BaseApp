@@ -19,7 +19,6 @@ public abstract class BaseActivity<VB extends ViewBinding> extends AppCompatActi
         loadData();
         initData();
         initListener();
-
     }
 
     @Override
