@@ -178,30 +178,39 @@ public class TimeActivity extends BaseActivity<ActivityTimeBinding> implements V
     //设置日期
     private void setTimeUp() {
         if (mBinding.timeDay.isChecked()) {
-            mBinding.timeDay.setText(String.valueOf(++INDEX_DAY));
+            if (INDEX_DAY >= 1 && INDEX_DAY <= 31)
+                mBinding.timeDay.setText(String.valueOf(INDEX_DAY++));
         } else if (mBinding.timeMonth.isChecked()) {
-            mBinding.timeMonth.setText(String.valueOf(++INDEX_MONTH));
+            if (INDEX_MONTH >= 1 && INDEX_MONTH <= 12)
+                mBinding.timeMonth.setText(String.valueOf(INDEX_MONTH++));
         } else if (mBinding.timeYear.isChecked()) {
-            mBinding.timeYear.setText(String.valueOf(++INDEX_YEAR));
+            if (INDEX_YEAR >= 2020 && INDEX_YEAR <= 2050)
+                mBinding.timeYear.setText(String.valueOf(INDEX_YEAR++));
         } else if (mBinding.timeHour.isChecked()) {
-            mBinding.timeHour.setText(String.valueOf(++INDEX_HOUR));
+            if (INDEX_HOUR >= 1 && INDEX_HOUR <= 24)
+                mBinding.timeHour.setText(String.valueOf(INDEX_HOUR++));
         } else if (mBinding.timeMinutes.isChecked()) {
-            mBinding.timeMinutes.setText(String.valueOf(++INDEX_MINUTES));
-
+            if (INDEX_MINUTES >= 1 && INDEX_MINUTES <= 60)
+                mBinding.timeMinutes.setText(String.valueOf(INDEX_MINUTES++));
         }
     }
 
     private void setTimeDown() {
         if (mBinding.timeDay.isChecked()) {
-            mBinding.timeDay.setText(String.valueOf(--INDEX_DAY));
+            if (INDEX_DAY > 1)
+                mBinding.timeDay.setText(String.valueOf(--INDEX_DAY));
         } else if (mBinding.timeMonth.isChecked()) {
-            mBinding.timeMonth.setText(String.valueOf(--INDEX_MONTH));
+            if (INDEX_MONTH > 1)
+                mBinding.timeMonth.setText(String.valueOf(--INDEX_MONTH));
         } else if (mBinding.timeYear.isChecked()) {
-            mBinding.timeYear.setText(String.valueOf(--INDEX_YEAR));
+            if (INDEX_YEAR > 2020)
+                mBinding.timeYear.setText(String.valueOf(--INDEX_YEAR));
         } else if (mBinding.timeHour.isChecked()) {
-            mBinding.timeHour.setText(String.valueOf(--INDEX_HOUR));
+            if (INDEX_HOUR > 1)
+                mBinding.timeHour.setText(String.valueOf(--INDEX_HOUR));
         } else if (mBinding.timeMinutes.isChecked()) {
-            mBinding.timeMinutes.setText(String.valueOf(--INDEX_MINUTES));
+            if (INDEX_MINUTES > 1)
+                mBinding.timeMinutes.setText(String.valueOf(--INDEX_MINUTES));
         }
     }
 }
