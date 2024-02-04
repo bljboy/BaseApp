@@ -1,9 +1,12 @@
 package com.example.clouds;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
 import androidx.viewbinding.ViewBinding;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.view.Gravity;
 
 import com.example.clouds.base.BaseActivity;
 import com.example.clouds.databinding.ActivityMainBinding;
@@ -24,6 +27,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
 
     @Override
     protected void initView() {
+        setSupportActionBar(mBinding.mainToolbar);
         mMainViewPagerAdapter = new MainViewPagerAdapter(this);
         mMainViewPagerAdapter.addFragment(new CloundsFragment(), getResources().getString(R.string.title_tab_clounds));
         mMainViewPagerAdapter.addFragment(new LocalsFragment(), getResources().getString(R.string.title_tab_locals));
@@ -35,7 +39,10 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
 
     @Override
     protected void initListener() {
-
+        //打开抽屉
+        mBinding.mainDrawer.setOnClickListener((b) -> {
+            mBinding.mainDrawerlayout.openDrawer(GravityCompat.START);
+        });
     }
 
     @Override

@@ -15,7 +15,7 @@ public class BlankFragment extends BaseFragment<FragmentBlankBinding> {
 
     @Override
     protected void initView() {
-        mBinding.text.setText("我爱你");
+//        mBinding.text.setText("我爱你");
     }
 
     @Override

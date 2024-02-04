@@ -1,66 +1,48 @@
 package com.example.clouds.ui.clounds;
 
-import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.clouds.R;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.viewbinding.ViewBinding;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link CloundsFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class CloundsFragment extends Fragment {
+import com.example.clouds.base.BaseFragment;
+import com.example.clouds.databinding.FragmentCloundsBinding;
+import com.example.clouds.ui.adapter.CloundsAdapter;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+public class CloundsFragment extends BaseFragment<FragmentCloundsBinding> {
+    private CloundsAdapter mCloundsAdapter;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    @Override
+    protected void initView() {
+        mCloundsAdapter = new CloundsAdapter();
+        mBinding.recyclerviewClounds.setLayoutManager(new LinearLayoutManager(getContext()));
+        mBinding.recyclerviewClounds.setAdapter(mCloundsAdapter);
 
-    public CloundsFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment CloundsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static CloundsFragment newInstance(String param1, String param2) {
-        CloundsFragment fragment = new CloundsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+    protected void initViewModel() {
+
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_clounds, container, false);
+    protected void initListener() {
+
+    }
+
+    @Override
+    protected void loadData() {
+
+    }
+
+    @Override
+    protected void initData() {
+
+    }
+
+    @Override
+    protected FragmentCloundsBinding getViewBinding(LayoutInflater inflater, ViewGroup container) {
+        return FragmentCloundsBinding.inflate(inflater, container, false);
     }
 }
