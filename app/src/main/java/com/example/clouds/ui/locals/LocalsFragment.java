@@ -1,66 +1,75 @@
 package com.example.clouds.ui.locals;
 
+import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.viewbinding.ViewBinding;
 
+import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.clouds.R;
+import com.example.clouds.base.BaseFragment;
+import com.example.clouds.databinding.FragmentLocalsBinding;
+import com.example.clouds.global.MusicType;
+import com.example.clouds.global.Request;
+import com.example.clouds.ui.adapter.LocalsAdapter;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link LocalsFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class LocalsFragment extends Fragment {
+import org.jetbrains.annotations.NotNull;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+public class LocalsFragment extends BaseFragment<FragmentLocalsBinding> {
+    private final String TAG = getClass().getName();
+    private LocalsAdapter mLocalsAdapter;
+    private LocalsViewModel model;
+    private List<File> foundFiles = new ArrayList<>();
 
-    public LocalsFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment LocalsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static LocalsFragment newInstance(String param1, String param2) {
-        LocalsFragment fragment = new LocalsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    @Override
+    protected void initView() {
+        mLocalsAdapter = new LocalsAdapter();
+        mBinding.recyclerviewLocals.setLayoutManager(new LinearLayoutManager(getContext()));
+        mBinding.recyclerviewLocals.setAdapter(mLocalsAdapter);
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+    protected void initViewModel() {
+        model = new ViewModelProvider(this).get(LocalsViewModel.class);
+        Request.RequestRead(getActivity());
+        model.initConnect(getActivity().getApplication());
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_locals, container, false);
+    protected void initListener() {
+
     }
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    @Override
+    protected void loadData() {
+//        model.scanMusicFiles();
+        model.openFilePicker(getActivity());
+        model.searchFiles(getActivity().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), MusicType.FLAC, foundFiles);
+    }
+
+    @Override
+    protected void initData() {
+
+    }
+
+    @Override
+    protected FragmentLocalsBinding getViewBinding(LayoutInflater inflater, ViewGroup container) {
+        return FragmentLocalsBinding.inflate(inflater, container, false);
+    }
+
 }
